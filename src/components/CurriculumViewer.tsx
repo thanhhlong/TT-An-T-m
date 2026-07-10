@@ -15,7 +15,19 @@ export default function CurriculumViewer({ role }: CurriculumViewerProps) {
   const grades = ["Lớp 6", "Lớp 7", "Lớp 8", "Lớp 9"];
   const subjects = ["Toán", "Tiếng Anh", "Văn", "KHTN"];
 
-  const activeLessons = CURRICULUM_DATA[selectedGrade]?.[selectedSubject] || [];
+  const curriculumData = (() => {
+    const saved = localStorage.getItem("antam_curriculum_data");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Error loading curriculum data in CurriculumViewer", e);
+      }
+    }
+    return CURRICULUM_DATA;
+  })();
+
+  const activeLessons = curriculumData[selectedGrade]?.[selectedSubject] || [];
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-6" id="curriculum-viewer-root">

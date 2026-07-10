@@ -48,7 +48,11 @@ import {
   UserCheck,
   BarChart2,
   Settings,
-  Key
+  Key,
+  Plus,
+  PlusCircle,
+  Pencil,
+  Save
 } from "lucide-react";
 
 const DEFAULT_JSON_DB = `[
@@ -176,6 +180,24 @@ export default function App() {
     { hoTen: "Cô Lê Thị Bình", taiKhoan: "nguyenvana", matKhau: "teacher123", monHoc: "Ngữ văn", capHoc: "Lớp 7" },
   ]);
 
+  // Curriculum Data State (allows adding lessons and quizzes dynamically)
+  const [curriculumData, setCurriculumData] = useState<any>(() => {
+    const saved = localStorage.getItem("antam_curriculum_data");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Error loading curriculum data", e);
+      }
+    }
+    return CURRICULUM_DATA;
+  });
+
+  const updateCurriculumData = (newData: any) => {
+    setCurriculumData(newData);
+    localStorage.setItem("antam_curriculum_data", JSON.stringify(newData));
+  };
+
   // Student AI Chat state
   const [studentMessages, setStudentMessages] = useState<{ sender: "user" | "ai"; text: string }[]>([]);
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -192,7 +214,79 @@ export default function App() {
   const [expandedLessonId, setExpandedLessonId] = useState<string | null>(null);
 
   // Admin Dashboard States
-  const [adminActiveTab, setAdminActiveTab] = useState<"stats" | "students" | "instructions" | "settings">("stats");
+  const [adminActiveTab, setAdminActiveTab] = useState<"stats" | "students" | "hoc-lieu" | "kiem-tra" | "instructions" | "settings">("stats");
+  const [adminSelectedSubject, setAdminSelectedSubject] = useState<"Toán" | "Văn" | "Tiếng Anh" | "KHTN">("Toán");
+  const [adminSelectedGrade, setAdminSelectedGrade] = useState<string>("Lớp 6");
+  const [adminQuizSelectedSubject, setAdminQuizSelectedSubject] = useState<"Toán" | "Văn" | "Tiếng Anh" | "KHTN">("Toán");
+  const [adminQuizSelectedGrade, setAdminQuizSelectedGrade] = useState<string>("Lớp 6");
+  const [adminExpandedLessonId, setAdminExpandedLessonId] = useState<string | null>(null);
+  const [adminExpandedQuizId, setAdminExpandedQuizId] = useState<string | null>(null);
+
+  // Create Lesson & Quiz Admin Forms State
+  const [showCreateLessonForm, setShowCreateLessonForm] = useState(false);
+  const [newLessonTitle, setNewLessonTitle] = useState("");
+  const [newLessonSummary, setNewLessonSummary] = useState("");
+  const [newLessonTheory, setNewLessonTheory] = useState("");
+
+  const [showCreateQuizForm, setShowCreateQuizForm] = useState(false);
+  const [newQuizTitle, setNewQuizTitle] = useState("");
+  const [newQuizQuestions, setNewQuizQuestions] = useState<any[]>([]);
+  const [newQuestionText, setNewQuestionText] = useState("");
+  const [newQuestionOptionA, setNewQuestionOptionA] = useState("");
+  const [newQuestionOptionB, setNewQuestionOptionB] = useState("");
+  const [newQuestionOptionC, setNewQuestionOptionC] = useState("");
+  const [newQuestionOptionD, setNewQuestionOptionD] = useState("");
+  const [newQuestionCorrectIndex, setNewQuestionCorrectIndex] = useState(0);
+  const [newQuestionExplanation, setNewQuestionExplanation] = useState("");
+
+  // Curriculum materials & Quiz edit state
+  const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
+  const [editLessonTitle, setEditLessonTitle] = useState("");
+  const [editLessonSummary, setEditLessonSummary] = useState("");
+  const [editLessonTheory, setEditLessonTheory] = useState("");
+
+  const [editingQuizId, setEditingQuizId] = useState<string | null>(null);
+  const [editQuizTitle, setEditQuizTitle] = useState("");
+  const [editQuizQuestions, setEditQuizQuestions] = useState<any[]>([]);
+  const [editQuizQuestionText, setEditQuizQuestionText] = useState("");
+  const [editQuizQuestionOptionA, setEditQuizQuestionOptionA] = useState("");
+  const [editQuizQuestionOptionB, setEditQuizQuestionOptionB] = useState("");
+  const [editQuizQuestionOptionC, setEditQuizQuestionOptionC] = useState("");
+  const [editQuizQuestionOptionD, setEditQuizQuestionOptionD] = useState("");
+  const [editQuizQuestionCorrectIndex, setEditQuizQuestionCorrectIndex] = useState(0);
+  const [editQuizQuestionExplanation, setEditQuizQuestionExplanation] = useState("");
+  const [selectedQuizQuestionIndex, setSelectedQuizQuestionIndex] = useState<number | null>(null);
+
+  // Accounts Management States
+  const [accountTab, setAccountTab] = useState<"student" | "teacher">("student");
+  const [showAddAccountForm, setShowAddAccountForm] = useState(false);
+  const [newAccHoTen, setNewAccHoTen] = useState("");
+  const [newAccTaiKhoan, setNewAccTaiKhoan] = useState("");
+  const [newAccMatKhau, setNewAccMatKhau] = useState("");
+  const [newAccKhoi, setNewAccKhoi] = useState("Lớp 8");
+  const [newAccMonHoc, setNewAccMonHoc] = useState("Toán");
+  const [newAccDiemToan, setNewAccDiemToan] = useState(8.0);
+  const [newAccDiemKHTN, setNewAccDiemKHTN] = useState(8.0);
+  const [newAccDiemTiengAnh, setNewAccDiemTiengAnh] = useState(8.0);
+  const [newAccDiemVan, setNewAccDiemVan] = useState(8.0);
+
+  const [editingStudentUsername, setEditingStudentUsername] = useState<string | null>(null);
+  const [editingStudentHoTen, setEditingStudentHoTen] = useState("");
+  const [editingStudentTaiKhoan, setEditingStudentTaiKhoan] = useState("");
+  const [editingStudentMatKhau, setEditingStudentMatKhau] = useState("");
+  const [editingStudentKhoi, setEditingStudentKhoi] = useState("");
+  const [editingStudentDiemToan, setEditingStudentDiemToan] = useState(0);
+  const [editingStudentDiemKHTN, setEditingStudentDiemKHTN] = useState(0);
+  const [editingStudentDiemTiengAnh, setEditingStudentDiemTiengAnh] = useState(0);
+  const [editingStudentDiemVan, setEditingStudentDiemVan] = useState(0);
+
+  const [editingTeacherUsername, setEditingTeacherUsername] = useState<string | null>(null);
+  const [editingTeacherHoTen, setEditingTeacherHoTen] = useState("");
+  const [editingTeacherTaiKhoan, setEditingTeacherTaiKhoan] = useState("");
+  const [editingTeacherMatKhau, setEditingTeacherMatKhau] = useState("");
+  const [editingTeacherMonHoc, setEditingTeacherMonHoc] = useState("");
+  const [editingTeacherCapHoc, setEditingTeacherCapHoc] = useState("");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudentForDetails, setSelectedStudentForDetails] = useState<any | null>(null);
   const [editingUsername, setEditingUsername] = useState<string | null>(null);
@@ -250,6 +344,297 @@ export default function App() {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [studentMessages]);
+
+  // Create Lesson logic
+  const handleCreateLesson = () => {
+    if (!newLessonTitle.trim()) {
+      alert("Vui lòng nhập tiêu đề bài học!");
+      return;
+    }
+    if (!newLessonSummary.trim()) {
+      alert("Vui lòng nhập tóm tắt bài học!");
+      return;
+    }
+    if (!newLessonTheory.trim()) {
+      alert("Vui lòng nhập nội dung lý thuyết bài học!");
+      return;
+    }
+
+    const newLessonId = `lesson-${Date.now()}`;
+    const newLessonObj = {
+      id: newLessonId,
+      title: newLessonTitle,
+      summary: newLessonSummary,
+      theory: newLessonTheory,
+      questions: []
+    };
+
+    const updatedCurriculum = { ...curriculumData };
+    if (!updatedCurriculum[adminSelectedGrade]) {
+      updatedCurriculum[adminSelectedGrade] = {};
+    }
+    if (!updatedCurriculum[adminSelectedGrade][adminSelectedSubject]) {
+      updatedCurriculum[adminSelectedGrade][adminSelectedSubject] = [];
+    }
+
+    updatedCurriculum[adminSelectedGrade][adminSelectedSubject] = [
+      ...updatedCurriculum[adminSelectedGrade][adminSelectedSubject],
+      newLessonObj
+    ];
+
+    updateCurriculumData(updatedCurriculum);
+
+    // reset fields
+    setNewLessonTitle("");
+    setNewLessonSummary("");
+    setNewLessonTheory("");
+    setShowCreateLessonForm(false);
+  };
+
+  // Add a question to current quiz builder
+  const handleAddQuestionToQuizBuilder = () => {
+    if (!newQuestionText.trim()) {
+      alert("Vui lòng nhập câu hỏi!");
+      return;
+    }
+    if (!newQuestionOptionA.trim() || !newQuestionOptionB.trim() || !newQuestionOptionC.trim() || !newQuestionOptionD.trim()) {
+      alert("Vui lòng nhập đầy đủ 4 phương án trả lời!");
+      return;
+    }
+
+    const newQuestionObj = {
+      question: newQuestionText,
+      options: [newQuestionOptionA, newQuestionOptionB, newQuestionOptionC, newQuestionOptionD],
+      correctIndex: newQuestionCorrectIndex,
+      explanation: newQuestionExplanation || "Giải thích chi tiết cho đáp án đúng."
+    };
+
+    setNewQuizQuestions([...newQuizQuestions, newQuestionObj]);
+
+    // Clear question fields for next question entry
+    setNewQuestionText("");
+    setNewQuestionOptionA("");
+    setNewQuestionOptionB("");
+    setNewQuestionOptionC("");
+    setNewQuestionOptionD("");
+    setNewQuestionCorrectIndex(0);
+    setNewQuestionExplanation("");
+  };
+
+  // Save the entire quiz
+  const handleCreateQuiz = () => {
+    if (!newQuizTitle.trim()) {
+      alert("Vui lòng nhập tiêu đề đề kiểm tra!");
+      return;
+    }
+    if (newQuizQuestions.length === 0) {
+      alert("Vui lòng thêm ít nhất 1 câu hỏi vào đề kiểm tra!");
+      return;
+    }
+
+    const newLessonId = `quiz-${Date.now()}`;
+    const newQuizObj = {
+      id: newLessonId,
+      title: newQuizTitle,
+      summary: `Bài kiểm tra trắc nghiệm: ${newQuizTitle}. Hãy chọn đáp án chính xác nhất để hoàn thành bài luyện tập.`,
+      theory: `Chào mừng em đến với bài trắc nghiệm về chủ đề **${newQuizTitle}**. Hãy click nút "Luyện tập trắc nghiệm" bên dưới để bắt đầu làm bài.`,
+      questions: newQuizQuestions
+    };
+
+    const updatedCurriculum = { ...curriculumData };
+    if (!updatedCurriculum[adminQuizSelectedGrade]) {
+      updatedCurriculum[adminQuizSelectedGrade] = {};
+    }
+    if (!updatedCurriculum[adminQuizSelectedGrade][adminQuizSelectedSubject]) {
+      updatedCurriculum[adminQuizSelectedGrade][adminQuizSelectedSubject] = [];
+    }
+
+    updatedCurriculum[adminQuizSelectedGrade][adminQuizSelectedSubject] = [
+      ...updatedCurriculum[adminQuizSelectedGrade][adminQuizSelectedSubject],
+      newQuizObj
+    ];
+
+    updateCurriculumData(updatedCurriculum);
+
+    // reset fields
+    setNewQuizTitle("");
+    setNewQuizQuestions([]);
+    setShowCreateQuizForm(false);
+  };
+
+  // Update Lesson logic
+  const handleUpdateLesson = (grade: string, subject: string, lessonId: string) => {
+    if (!editLessonTitle.trim()) {
+      alert("Vui lòng nhập tiêu đề bài học!");
+      return;
+    }
+    if (!editLessonSummary.trim()) {
+      alert("Vui lòng nhập tóm tắt bài học!");
+      return;
+    }
+    if (!editLessonTheory.trim()) {
+      alert("Vui lòng nhập lý thuyết bài học!");
+      return;
+    }
+
+    const updatedCurriculum = { ...curriculumData };
+    if (updatedCurriculum[grade]?.[subject]) {
+      updatedCurriculum[grade][subject] = updatedCurriculum[grade][subject].map((lesson: any) => {
+        if (lesson.id === lessonId) {
+          return {
+            ...lesson,
+            title: editLessonTitle,
+            summary: editLessonSummary,
+            theory: editLessonTheory
+          };
+        }
+        return lesson;
+      });
+      updateCurriculumData(updatedCurriculum);
+      setEditingLessonId(null);
+    }
+  };
+
+  // Delete Lesson logic
+  const handleDeleteLesson = (grade: string, subject: string, lessonId: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa bài giảng này không?")) {
+      return;
+    }
+    const updatedCurriculum = { ...curriculumData };
+    if (updatedCurriculum[grade]?.[subject]) {
+      updatedCurriculum[grade][subject] = updatedCurriculum[grade][subject].filter((lesson: any) => lesson.id !== lessonId);
+      updateCurriculumData(updatedCurriculum);
+      setEditingLessonId(null);
+    }
+  };
+
+  // Update Quiz logic
+  const handleUpdateQuiz = (grade: string, subject: string, quizId: string) => {
+    if (!editQuizTitle.trim()) {
+      alert("Vui lòng nhập tiêu đề đề kiểm tra!");
+      return;
+    }
+    if (editQuizQuestions.length === 0) {
+      alert("Vui lòng thêm ít nhất 1 câu hỏi vào đề kiểm tra!");
+      return;
+    }
+
+    const updatedCurriculum = { ...curriculumData };
+    if (updatedCurriculum[grade]?.[subject]) {
+      updatedCurriculum[grade][subject] = updatedCurriculum[grade][subject].map((quiz: any) => {
+        if (quiz.id === quizId) {
+          return {
+            ...quiz,
+            title: editQuizTitle,
+            summary: `Bài kiểm tra trắc nghiệm: ${editQuizTitle}. Hãy chọn đáp án chính xác nhất để hoàn thành bài luyện tập.`,
+            theory: `Chào mừng em đến với bài trắc nghiệm về chủ đề **${editQuizTitle}**. Hãy click nút "Luyện tập trắc nghiệm" bên dưới để bắt đầu làm bài.`,
+            questions: editQuizQuestions
+          };
+        }
+        return quiz;
+      });
+      updateCurriculumData(updatedCurriculum);
+      setEditingQuizId(null);
+    }
+  };
+
+  // Delete Quiz logic
+  const handleDeleteQuiz = (grade: string, subject: string, quizId: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa đề kiểm tra này không?")) {
+      return;
+    }
+    const updatedCurriculum = { ...curriculumData };
+    if (updatedCurriculum[grade]?.[subject]) {
+      updatedCurriculum[grade][subject] = updatedCurriculum[grade][subject].filter((quiz: any) => quiz.id !== quizId);
+      updateCurriculumData(updatedCurriculum);
+      setEditingQuizId(null);
+    }
+  };
+
+  // Save students to customDatabase
+  const saveStudentsList = (updatedStudents: any[]) => {
+    if (dbFormat === "json") {
+      setCustomDatabase(JSON.stringify(updatedStudents, null, 2));
+    } else {
+      const headers = "Họ tên học sinh,Tài khoản,Mật khẩu,Điểm Toán,Điểm KHTN,Điểm Tiếng Anh,Điểm Văn,Khối";
+      const rows = updatedStudents.map(s => 
+        `${s.hoTen},${s.taiKhoan},${s.matKhau},${s.diemToan},${s.diemKHTN},${s.diemTiengAnh},${s.diemVan},${s.khoi}`
+      );
+      setCustomDatabase([headers, ...rows].join("\n"));
+    }
+  };
+
+  // Add Student Account
+  const handleAddStudentAccount = (newStudent: any) => {
+    const current = getStudentsList();
+    if (current.some(s => s.taiKhoan.toLowerCase() === newStudent.taiKhoan.toLowerCase())) {
+      alert("Tài khoản học sinh này đã tồn tại!");
+      return false;
+    }
+    const updated = [...current, newStudent];
+    saveStudentsList(updated);
+    return true;
+  };
+
+  // Edit/Update Student Account
+  const handleUpdateStudentAccount = (oldUsername: string, updatedStudent: any) => {
+    const current = getStudentsList();
+    if (oldUsername.toLowerCase() !== updatedStudent.taiKhoan.toLowerCase()) {
+      if (current.some(s => s.taiKhoan.toLowerCase() === updatedStudent.taiKhoan.toLowerCase())) {
+        alert("Tài khoản mới này đã trùng với học sinh khác!");
+        return false;
+      }
+    }
+    const updated = current.map(s => s.taiKhoan.toLowerCase() === oldUsername.toLowerCase() ? updatedStudent : s);
+    saveStudentsList(updated);
+    return true;
+  };
+
+  // Delete Student Account
+  const handleDeleteStudentAccount = (username: string) => {
+    if (!confirm(`Bạn có chắc muốn xóa tài khoản học sinh ${username} không?`)) {
+      return;
+    }
+    const current = getStudentsList();
+    const updated = current.filter(s => s.taiKhoan.toLowerCase() !== username.toLowerCase());
+    saveStudentsList(updated);
+  };
+
+  // Add Teacher Account
+  const handleAddTeacherAccount = (newTeacher: any) => {
+    if (teachersList.some(t => t.taiKhoan.toLowerCase() === newTeacher.taiKhoan.toLowerCase())) {
+      alert("Tài khoản giáo viên này đã tồn tại!");
+      return false;
+    }
+    const updated = [...teachersList, newTeacher];
+    setTeachersList(updated);
+    localStorage.setItem("registered_teachers_list", JSON.stringify(updated));
+    return true;
+  };
+
+  // Edit/Update Teacher Account
+  const handleUpdateTeacherAccount = (oldUsername: string, updatedTeacher: any) => {
+    if (oldUsername.toLowerCase() !== updatedTeacher.taiKhoan.toLowerCase()) {
+      if (teachersList.some(t => t.taiKhoan.toLowerCase() === updatedTeacher.taiKhoan.toLowerCase())) {
+        alert("Tài khoản mới này đã trùng với giáo viên khác!");
+        return false;
+      }
+    }
+    const updated = teachersList.map(t => t.taiKhoan.toLowerCase() === oldUsername.toLowerCase() ? updatedTeacher : t);
+    setTeachersList(updated);
+    localStorage.setItem("registered_teachers_list", JSON.stringify(updated));
+    return true;
+  };
+
+  // Delete Teacher Account
+  const handleDeleteTeacherAccount = (username: string) => {
+    if (!confirm(`Bạn có chắc muốn xóa tài khoản giáo viên ${username} không?`)) {
+      return;
+    }
+    const updated = teachersList.filter(t => t.taiKhoan.toLowerCase() !== username.toLowerCase());
+    setTeachersList(updated);
+    localStorage.setItem("registered_teachers_list", JSON.stringify(updated));
+  };
 
   const getStudentsList = (): any[] => {
     try {
@@ -1061,7 +1446,7 @@ Please use this student profile to customize your teaching. Use the scaffolding 
   if (userRole === "student") {
     const student = currentUser;
 
-    const activeLessons = CURRICULUM_DATA[student.khoi || "Lớp 8"]?.[studentSelectedSubject] || [];
+    const activeLessons = curriculumData[student.khoi || "Lớp 8"]?.[studentSelectedSubject] || [];
 
     const handleAskAITeacherDirectly = async (customPrompt: string) => {
       if (isChatLoading) return;
@@ -1214,7 +1599,7 @@ Please use this student profile to customize your teaching. Use the scaffolding 
           </div>
 
           {/* Navigation Tabs for Student Dashboard */}
-          <div className="flex bg-white border border-slate-200 rounded-xl p-1 gap-1 w-full md:w-fit border shadow-xs">
+          <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 gap-1 w-fit self-start shadow-xs h-[51px]" id="student-nav-tabs">
             <button
               onClick={() => {
                 setStudentActiveTab("hoc-tap");
@@ -1907,12 +2292,12 @@ Please use this student profile to customize your teaching. Use the scaffolding 
           </div>
         </nav>
 
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row gap-6 items-start">
           {/* Menu sub navigation */}
-          <div className="flex bg-white border border-slate-200 rounded-xl p-1 gap-1 w-full md:w-fit border">
+          <div className="flex md:flex-col bg-white border border-slate-200 rounded-xl p-1 gap-1 w-full md:w-64 md:shrink-0 overflow-x-auto md:overflow-x-visible pb-1 md:pb-1 shadow-xs">
             <button
               onClick={() => setAdminActiveTab("stats")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer md:w-full md:justify-start ${
                 adminActiveTab === "stats"
                   ? "bg-slate-900 text-white shadow-sm"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
@@ -1923,7 +2308,7 @@ Please use this student profile to customize your teaching. Use the scaffolding 
             </button>
             <button
               onClick={() => setAdminActiveTab("students")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer md:w-full md:justify-start ${
                 adminActiveTab === "students"
                   ? "bg-slate-900 text-white shadow-sm"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
@@ -1933,8 +2318,30 @@ Please use this student profile to customize your teaching. Use the scaffolding 
               Quản lý Học sinh ({students.length})
             </button>
             <button
+              onClick={() => setAdminActiveTab("hoc-lieu")}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer md:w-full md:justify-start ${
+                adminActiveTab === "hoc-lieu"
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
+              Học liệu tự học
+            </button>
+            <button
+              onClick={() => setAdminActiveTab("kiem-tra")}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer md:w-full md:justify-start ${
+                adminActiveTab === "kiem-tra"
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              }`}
+            >
+              <Award className="w-3.5 h-3.5 text-amber-500" />
+              Bài kiểm tra
+            </button>
+            <button
               onClick={() => setAdminActiveTab("instructions")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer md:w-full md:justify-start ${
                 adminActiveTab === "instructions"
                   ? "bg-slate-900 text-white shadow-sm"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
@@ -1945,7 +2352,7 @@ Please use this student profile to customize your teaching. Use the scaffolding 
             </button>
             <button
               onClick={() => setAdminActiveTab("settings")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer md:w-full md:justify-start ${
                 adminActiveTab === "settings"
                   ? "bg-slate-900 text-white shadow-sm"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
@@ -1955,6 +2362,8 @@ Please use this student profile to customize your teaching. Use the scaffolding 
               Thiết lập hệ thống
             </button>
           </div>
+
+          <div className="flex-1 w-full space-y-6">
 
           {/* Sub Panels */}
           {adminActiveTab === "stats" && (
@@ -2063,102 +2472,1490 @@ Please use this student profile to customize your teaching. Use the scaffolding 
           )}
 
           {adminActiveTab === "students" && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Danh sách học sinh đồng bộ</h3>
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm học sinh theo họ tên hoặc tài khoản..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full sm:w-72 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                />
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-5">
+              {/* Internal account type selection tabs */}
+              <div className="flex border-b border-slate-100 pb-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setAccountTab("student")}
+                  className={`pb-2 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer ${
+                    accountTab === "student"
+                      ? "border-emerald-600 text-emerald-600"
+                      : "border-transparent text-slate-400 hover:text-slate-600"
+                  }`}
+                >
+                  Tài khoản Học sinh ({students.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAccountTab("teacher")}
+                  className={`pb-2 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer ${
+                    accountTab === "teacher"
+                      ? "border-emerald-600 text-emerald-600"
+                      : "border-transparent text-slate-400 hover:text-slate-600"
+                  }`}
+                >
+                  Tài khoản Giáo viên ({teachersList.length})
+                </button>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-200 text-slate-500 font-bold">
-                      <th className="pb-2">Họ tên học sinh</th>
-                      <th className="pb-2">Tài khoản</th>
-                      <th className="pb-2">Mật khẩu</th>
-                      <th className="pb-2 text-center">Toán</th>
-                      <th className="pb-2 text-center">KHTN</th>
-                      <th className="pb-2 text-center">Tiếng Anh</th>
-                      <th className="pb-2 text-center">Ngữ văn</th>
-                      <th className="pb-2 text-center">Khối học</th>
-                      <th className="pb-2 text-right">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-600">
-                    {filteredStudents.length === 0 ? (
-                      <tr>
-                        <td colSpan={9} className="text-center py-6 text-slate-400">Không tìm thấy học sinh nào phù hợp.</td>
+              {/* Action bar and Search */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center justify-between w-full sm:w-auto gap-4">
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    {accountTab === "student" ? "Danh sách học sinh đồng bộ" : "Danh sách tài khoản giáo viên"}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddAccountForm(!showAddAccountForm);
+                      setNewAccHoTen("");
+                      setNewAccTaiKhoan("");
+                      setNewAccMatKhau("");
+                      setNewAccKhoi("Lớp 8");
+                      setNewAccMonHoc("Toán");
+                      setNewAccDiemToan(8.0);
+                      setNewAccDiemKHTN(8.0);
+                      setNewAccDiemTiengAnh(8.0);
+                      setNewAccDiemVan(8.0);
+                    }}
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold shadow-xs transition-colors cursor-pointer flex items-center gap-1 shrink-0"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Thêm {accountTab === "student" ? "Học sinh" : "Giáo viên"}
+                  </button>
+                </div>
+                {accountTab === "student" && (
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm học sinh theo họ tên hoặc tài khoản..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full sm:w-72 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  />
+                )}
+              </div>
+
+              {/* Create New Account Panel */}
+              {showAddAccountForm && (
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 shadow-xs">
+                  <h4 className="font-bold text-slate-800 text-[11px] uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-200/50 pb-2">
+                    <Plus className="w-4 h-4 text-emerald-600" />
+                    Tạo tài khoản {accountTab === "student" ? "Học sinh" : "Giáo viên"} mới
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Họ và tên</label>
+                      <input
+                        type="text"
+                        value={newAccHoTen}
+                        onChange={(e) => setNewAccHoTen(e.target.value)}
+                        placeholder="Ví dụ: Nguyễn Văn A"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tên tài khoản (đăng nhập)</label>
+                      <input
+                        type="text"
+                        value={newAccTaiKhoan}
+                        onChange={(e) => setNewAccTaiKhoan(e.target.value)}
+                        placeholder="Ví dụ: hs_nguyenvana"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Mật khẩu</label>
+                      <input
+                        type="text"
+                        value={newAccMatKhau}
+                        onChange={(e) => setNewAccMatKhau(e.target.value)}
+                        placeholder="Mật khẩu..."
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+                  
+                  {accountTab === "student" ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                      <div className="space-y-1 bg-white p-2 border border-slate-150 rounded-xl">
+                        <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Khối lớp</label>
+                        <select
+                          value={newAccKhoi}
+                          onChange={(e) => setNewAccKhoi(e.target.value)}
+                          className="w-full bg-transparent text-xs focus:outline-none font-bold text-slate-800"
+                        >
+                          <option value="Lớp 6">Khối 6</option>
+                          <option value="Lớp 7">Khối 7</option>
+                          <option value="Lớp 8">Khối 8</option>
+                          <option value="Lớp 9">Khối 9</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1 bg-white p-2 border border-slate-150 rounded-xl">
+                        <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Điểm Toán</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="10"
+                          value={newAccDiemToan}
+                          onChange={(e) => setNewAccDiemToan(parseFloat(e.target.value) || 0)}
+                          className="w-full bg-transparent text-xs focus:outline-none font-semibold"
+                        />
+                      </div>
+                      <div className="space-y-1 bg-white p-2 border border-slate-150 rounded-xl">
+                        <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Điểm KHTN</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="10"
+                          value={newAccDiemKHTN}
+                          onChange={(e) => setNewAccDiemKHTN(parseFloat(e.target.value) || 0)}
+                          className="w-full bg-transparent text-xs focus:outline-none font-semibold"
+                        />
+                      </div>
+                      <div className="space-y-1 bg-white p-2 border border-slate-150 rounded-xl">
+                        <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Điểm Tiếng Anh</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="10"
+                          value={newAccDiemTiengAnh}
+                          onChange={(e) => setNewAccDiemTiengAnh(parseFloat(e.target.value) || 0)}
+                          className="w-full bg-transparent text-xs focus:outline-none font-semibold"
+                        />
+                      </div>
+                      <div className="space-y-1 bg-white p-2 border border-slate-150 rounded-xl">
+                        <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Điểm Ngữ văn</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="10"
+                          value={newAccDiemVan}
+                          onChange={(e) => setNewAccDiemVan(parseFloat(e.target.value) || 0)}
+                          className="w-full bg-transparent text-xs focus:outline-none font-semibold"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-1 bg-white p-2 border border-slate-150 rounded-xl">
+                        <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Môn giảng dạy</label>
+                        <select
+                          value={newAccMonHoc}
+                          onChange={(e) => setNewAccMonHoc(e.target.value)}
+                          className="w-full bg-transparent text-xs focus:outline-none font-semibold"
+                        >
+                          <option value="Toán">Môn Toán</option>
+                          <option value="KHTN">Môn KHTN</option>
+                          <option value="Tiếng Anh">Môn Tiếng Anh</option>
+                          <option value="Ngữ văn">Môn Ngữ văn</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1 bg-white p-2 border border-slate-150 rounded-xl">
+                        <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Cấp học giảng dạy</label>
+                        <input
+                          type="text"
+                          value="THCS"
+                          disabled
+                          className="w-full bg-transparent text-xs text-slate-500 focus:outline-none cursor-not-allowed font-semibold"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end gap-2 pt-2 border-t border-slate-200/60">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddAccountForm(false)}
+                      className="px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-600 cursor-pointer"
+                    >
+                      Hủy bỏ
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newAccHoTen.trim() || !newAccTaiKhoan.trim() || !newAccMatKhau.trim()) {
+                          alert("Vui lòng điền đầy đủ các thông tin Họ tên, Tài khoản, Mật khẩu!");
+                          return;
+                        }
+                        if (accountTab === "student") {
+                          const added = handleAddStudentAccount({
+                            hoTen: newAccHoTen,
+                            taiKhoan: newAccTaiKhoan,
+                            matKhau: newAccMatKhau,
+                            diemToan: newAccDiemToan,
+                            diemKHTN: newAccDiemKHTN,
+                            diemTiengAnh: newAccDiemTiengAnh,
+                            diemVan: newAccDiemVan,
+                            khoi: newAccKhoi
+                          });
+                          if (added) {
+                            setShowAddAccountForm(false);
+                          }
+                        } else {
+                          const added = handleAddTeacherAccount({
+                            hoTen: newAccHoTen,
+                            taiKhoan: newAccTaiKhoan,
+                            matKhau: newAccMatKhau,
+                            monHoc: newAccMonHoc,
+                            capHoc: "THCS"
+                          });
+                          if (added) {
+                            setShowAddAccountForm(false);
+                          }
+                        }
+                      }}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer"
+                    >
+                      Lưu tạo tài khoản
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Accounts Tables */}
+              {accountTab === "student" ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-500 font-bold">
+                        <th className="pb-2">Họ tên học sinh</th>
+                        <th className="pb-2">Tài khoản</th>
+                        <th className="pb-2">Mật khẩu</th>
+                        <th className="pb-2 text-center">Toán</th>
+                        <th className="pb-2 text-center">KHTN</th>
+                        <th className="pb-2 text-center">Tiếng Anh</th>
+                        <th className="pb-2 text-center">Ngữ văn</th>
+                        <th className="pb-2 text-center">Khối học</th>
+                        <th className="pb-2 text-right">Thao tác</th>
                       </tr>
-                    ) : (
-                      filteredStudents.map((s, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/50">
-                          <td className="py-2.5 font-bold text-slate-800">{s.hoTen}</td>
-                          <td className="py-2.5 font-mono">{s.taiKhoan}</td>
-                          <td className="py-2.5 font-mono">{s.matKhau}</td>
-                          <td className="py-2.5 text-center font-semibold text-emerald-600">{s.diemToan}</td>
-                          <td className="py-2.5 text-center font-semibold text-emerald-600">{s.diemKHTN}</td>
-                          <td className="py-2.5 text-center font-semibold text-emerald-600">{s.diemTiengAnh}</td>
-                          <td className="py-2.5 text-center font-semibold text-emerald-600">{s.diemVan}</td>
-                          <td className="py-2.5 text-center">
-                            {editingUsername === s.taiKhoan ? (
-                              <select
-                                value={editKhoi}
-                                onChange={(e) => setEditKhoi(e.target.value)}
-                                className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer font-sans"
-                              >
-                                <option value="Lớp 6">Khối 6 (Lớp 6)</option>
-                                <option value="Lớp 7">Khối 7 (Lớp 7)</option>
-                                <option value="Lớp 8">Khối 8 (Lớp 8)</option>
-                                <option value="Lớp 9">Khối 9 (Lớp 9)</option>
-                              </select>
-                            ) : (
-                              <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-bold text-[10px]">
-                                {s.khoi || "Lớp 8"}
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-2.5 text-right">
-                            {editingUsername === s.taiKhoan ? (
-                              <div className="flex justify-end gap-1.5">
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-600">
+                      {filteredStudents.length === 0 ? (
+                        <tr>
+                          <td colSpan={9} className="text-center py-6 text-slate-400">Không tìm thấy học sinh nào phù hợp.</td>
+                        </tr>
+                      ) : (
+                        filteredStudents.map((s, idx) => (
+                          editingStudentUsername === s.taiKhoan ? (
+                            <tr key={idx} className="bg-slate-50/75">
+                              <td colSpan={9} className="py-4 px-4 border border-slate-200 rounded-xl">
+                                <div className="space-y-4">
+                                  <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                                    <Pencil className="w-4 h-4 text-emerald-600" />
+                                    Chỉnh sửa thông tin học sinh
+                                  </h4>
+                                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase">Họ và tên</label>
+                                      <input
+                                        type="text"
+                                        value={editingStudentHoTen}
+                                        onChange={(e) => setEditingStudentHoTen(e.target.value)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase">Tài khoản</label>
+                                      <input
+                                        type="text"
+                                        value={editingStudentTaiKhoan}
+                                        onChange={(e) => setEditingStudentTaiKhoan(e.target.value)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase">Mật khẩu</label>
+                                      <input
+                                        type="text"
+                                        value={editingStudentMatKhau}
+                                        onChange={(e) => setEditingStudentMatKhau(e.target.value)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase">Khối lớp</label>
+                                      <select
+                                        value={editingStudentKhoi}
+                                        onChange={(e) => setEditingStudentKhoi(e.target.value)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                      >
+                                        <option value="Lớp 6">Khối 6</option>
+                                        <option value="Lớp 7">Khối 7</option>
+                                        <option value="Lớp 8">Khối 8</option>
+                                        <option value="Lớp 9">Khối 9</option>
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase">Điểm Toán</label>
+                                      <input
+                                        type="number"
+                                        step="0.1"
+                                        min="0"
+                                        max="10"
+                                        value={editingStudentDiemToan}
+                                        onChange={(e) => setEditingStudentDiemToan(parseFloat(e.target.value) || 0)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase">Điểm KHTN</label>
+                                      <input
+                                        type="number"
+                                        step="0.1"
+                                        min="0"
+                                        max="10"
+                                        value={editingStudentDiemKHTN}
+                                        onChange={(e) => setEditingStudentDiemKHTN(parseFloat(e.target.value) || 0)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase">Điểm Tiếng Anh</label>
+                                      <input
+                                        type="number"
+                                        step="0.1"
+                                        min="0"
+                                        max="10"
+                                        value={editingStudentDiemTiengAnh}
+                                        onChange={(e) => setEditingStudentDiemTiengAnh(parseFloat(e.target.value) || 0)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase">Điểm Ngữ văn</label>
+                                      <input
+                                        type="number"
+                                        step="0.1"
+                                        min="0"
+                                        max="10"
+                                        value={editingStudentDiemVan}
+                                        onChange={(e) => setEditingStudentDiemVan(parseFloat(e.target.value) || 0)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="flex justify-between items-center pt-3 border-t border-slate-200/60">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        handleDeleteStudentAccount(s.taiKhoan);
+                                        setEditingStudentUsername(null);
+                                      }}
+                                      className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                      Xóa học sinh
+                                    </button>
+                                    <div className="flex gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditingStudentUsername(null)}
+                                        className="px-3.5 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-600 cursor-pointer"
+                                      >
+                                        Hủy
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          if (!editingStudentHoTen.trim() || !editingStudentTaiKhoan.trim() || !editingStudentMatKhau.trim()) {
+                                            alert("Vui lòng điền đủ các thông tin bắt buộc!");
+                                            return;
+                                          }
+                                          const success = handleUpdateStudentAccount(s.taiKhoan, {
+                                            hoTen: editingStudentHoTen,
+                                            taiKhoan: editingStudentTaiKhoan,
+                                            matKhau: editingStudentMatKhau,
+                                            khoi: editingStudentKhoi,
+                                            diemToan: editingStudentDiemToan,
+                                            diemKHTN: editingStudentDiemKHTN,
+                                            diemTiengAnh: editingStudentDiemTiengAnh,
+                                            diemVan: editingStudentDiemVan
+                                          });
+                                          if (success) {
+                                            setEditingStudentUsername(null);
+                                          }
+                                        }}
+                                        className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1"
+                                      >
+                                        <Save className="w-3.5 h-3.5" />
+                                        Lưu thay đổi
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : (
+                            <tr key={idx} className="hover:bg-slate-50/50">
+                              <td className="py-2.5 font-bold text-slate-800">{s.hoTen}</td>
+                              <td className="py-2.5 font-mono">{s.taiKhoan}</td>
+                              <td className="py-2.5 font-mono">{s.matKhau}</td>
+                              <td className="py-2.5 text-center font-semibold text-emerald-600">{s.diemToan}</td>
+                              <td className="py-2.5 text-center font-semibold text-emerald-600">{s.diemKHTN}</td>
+                              <td className="py-2.5 text-center font-semibold text-emerald-600">{s.diemTiengAnh}</td>
+                              <td className="py-2.5 text-center font-semibold text-emerald-600">{s.diemVan}</td>
+                              <td className="py-2.5 text-center">
+                                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full font-bold text-[10px]">
+                                  {s.khoi || "Lớp 8"}
+                                </span>
+                              </td>
+                              <td className="py-2.5 text-right">
                                 <button
                                   type="button"
-                                  onClick={() => handleSaveStudentGrade(s.taiKhoan)}
-                                  className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-[10px] shadow-xs cursor-pointer"
+                                  onClick={() => {
+                                    setEditingStudentUsername(s.taiKhoan);
+                                    setEditingStudentHoTen(s.hoTen);
+                                    setEditingStudentTaiKhoan(s.taiKhoan);
+                                    setEditingStudentMatKhau(s.matKhau);
+                                    setEditingStudentKhoi(s.khoi || "Lớp 8");
+                                    setEditingStudentDiemToan(s.diemToan || 0);
+                                    setEditingStudentDiemKHTN(s.diemKHTN || 0);
+                                    setEditingStudentDiemTiengAnh(s.diemTiengAnh || 0);
+                                    setEditingStudentDiemVan(s.diemVan || 0);
+                                  }}
+                                  className="px-2.5 py-1 text-slate-700 hover:text-emerald-700 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 rounded-lg text-[10px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"
                                 >
-                                  Lưu
+                                  <Pencil className="w-3 h-3 text-emerald-600" />
+                                  Chỉnh sửa
                                 </button>
+                              </td>
+                            </tr>
+                          )
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-500 font-bold">
+                        <th className="pb-2">Họ tên giáo viên</th>
+                        <th className="pb-2">Tài khoản</th>
+                        <th className="pb-2">Mật khẩu</th>
+                        <th className="pb-2 text-center">Môn học</th>
+                        <th className="pb-2 text-center">Cấp học</th>
+                        <th className="pb-2 text-right">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-600">
+                      {teachersList.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="text-center py-6 text-slate-400">Chưa có giáo viên nào được đăng ký.</td>
+                        </tr>
+                      ) : (
+                        teachersList.map((t, idx) => (
+                          editingTeacherUsername === t.taiKhoan ? (
+                            <tr key={idx} className="bg-slate-50/75">
+                              <td colSpan={6} className="py-4 px-4 border border-slate-200 rounded-xl">
+                                <div className="space-y-4">
+                                  <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                                    <Pencil className="w-4 h-4 text-emerald-600" />
+                                    Chỉnh sửa thông tin giáo viên
+                                  </h4>
+                                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase">Họ và tên</label>
+                                      <input
+                                        type="text"
+                                        value={editingTeacherHoTen}
+                                        onChange={(e) => setEditingTeacherHoTen(e.target.value)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase">Tài khoản</label>
+                                      <input
+                                        type="text"
+                                        value={editingTeacherTaiKhoan}
+                                        onChange={(e) => setEditingTeacherTaiKhoan(e.target.value)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase">Mật khẩu</label>
+                                      <input
+                                        type="text"
+                                        value={editingTeacherMatKhau}
+                                        onChange={(e) => setEditingTeacherMatKhau(e.target.value)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase">Môn học</label>
+                                      <select
+                                        value={editingTeacherMonHoc}
+                                        onChange={(e) => setEditingTeacherMonHoc(e.target.value)}
+                                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                      >
+                                        <option value="Toán">Toán</option>
+                                        <option value="KHTN">KHTN</option>
+                                        <option value="Tiếng Anh">Tiếng Anh</option>
+                                        <option value="Ngữ văn">Ngữ văn</option>
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex justify-between items-center pt-3 border-t border-slate-200/60">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        handleDeleteTeacherAccount(t.taiKhoan);
+                                        setEditingTeacherUsername(null);
+                                      }}
+                                      className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                      Xóa giáo viên
+                                    </button>
+                                    <div className="flex gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditingTeacherUsername(null)}
+                                        className="px-3.5 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-600 cursor-pointer"
+                                      >
+                                        Hủy
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          if (!editingTeacherHoTen.trim() || !editingTeacherTaiKhoan.trim() || !editingTeacherMatKhau.trim()) {
+                                            alert("Vui lòng điền đủ thông tin!");
+                                            return;
+                                          }
+                                          const success = handleUpdateTeacherAccount(t.taiKhoan, {
+                                            hoTen: editingTeacherHoTen,
+                                            taiKhoan: editingTeacherTaiKhoan,
+                                            matKhau: editingTeacherMatKhau,
+                                            monHoc: editingTeacherMonHoc,
+                                            capHoc: "THCS"
+                                          });
+                                          if (success) {
+                                            setEditingTeacherUsername(null);
+                                          }
+                                        }}
+                                        className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1"
+                                      >
+                                        <Save className="w-3.5 h-3.5" />
+                                        Lưu thay đổi
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : (
+                            <tr key={idx} className="hover:bg-slate-50/50">
+                              <td className="py-2.5 font-bold text-slate-800">{t.hoTen}</td>
+                              <td className="py-2.5 font-mono">{t.taiKhoan}</td>
+                              <td className="py-2.5 font-mono">{t.matKhau}</td>
+                              <td className="py-2.5 text-center font-semibold text-emerald-600">{t.monHoc}</td>
+                              <td className="py-2.5 text-center">{t.capHoc || "THCS"}</td>
+                              <td className="py-2.5 text-right">
                                 <button
                                   type="button"
-                                  onClick={() => setEditingUsername(null)}
-                                  className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg text-[10px] cursor-pointer"
+                                  onClick={() => {
+                                    setEditingTeacherUsername(t.taiKhoan);
+                                    setEditingTeacherHoTen(t.hoTen);
+                                    setEditingTeacherTaiKhoan(t.taiKhoan);
+                                    setEditingTeacherMatKhau(t.matKhau);
+                                    setEditingTeacherMonHoc(t.monHoc || "Toán");
+                                    setEditingTeacherCapHoc(t.capHoc || "THCS");
+                                  }}
+                                  className="px-2.5 py-1 text-slate-700 hover:text-emerald-700 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 rounded-lg text-[10px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"
+                                >
+                                  <Pencil className="w-3 h-3 text-emerald-600" />
+                                  Chỉnh sửa
+                                </button>
+                              </td>
+                            </tr>
+                          )
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {adminActiveTab === "hoc-lieu" && (
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-5">
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                <div>
+                  <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                    <BookOpenCheck className="w-4.5 h-4.5 text-emerald-600" />
+                    Quản lý Học liệu Tự học
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Chọn môn học để xem các khối lớp tương ứng</p>
+                </div>
+                <button
+                  onClick={() => setShowCreateLessonForm(!showCreateLessonForm)}
+                  className="flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer shrink-0"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>Tạo bài học mới</span>
+                </button>
+              </div>
+
+              {/* Creation Form */}
+              {showCreateLessonForm && (
+                <div className="p-5 border border-emerald-200 bg-emerald-50/10 rounded-2xl space-y-4 shadow-sm animate-fadeIn">
+                  <div className="flex items-center justify-between border-b border-emerald-100 pb-2">
+                    <h4 className="font-bold text-emerald-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                      <Plus className="w-4 h-4" />
+                      Tạo Bài học Mới ({adminSelectedSubject} - {adminSelectedGrade})
+                    </h4>
+                    <button 
+                      onClick={() => setShowCreateLessonForm(false)}
+                      className="text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer"
+                    >
+                      Đóng
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-600">Tiêu đề bài giảng</label>
+                      <input
+                        type="text"
+                        placeholder="Ví dụ: Bài 2: Tập hợp số nguyên"
+                        value={newLessonTitle}
+                        onChange={(e) => setNewLessonTitle(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-600">Mô tả ngắn gọn (Tóm tắt)</label>
+                      <input
+                        type="text"
+                        placeholder="Ví dụ: Giới thiệu số nguyên âm, số nguyên dương và các phép tính..."
+                        value={newLessonSummary}
+                        onChange={(e) => setNewLessonSummary(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-slate-600 flex justify-between">
+                      <span>Nội dung bài học (Hỗ trợ Markdown)</span>
+                      <span className="text-[10px] text-slate-400 font-normal">Hỗ trợ định dạng tiêu đề, danh sách, công thức Toán...</span>
+                    </label>
+                    <textarea
+                      rows={6}
+                      placeholder="Nhập lý thuyết bài giảng tại đây. Ví dụ:&#10;### 1. Số nguyên âm&#10;Các số -1, -2, -3... là các số nguyên âm.&#10;&#10;### 2. Trục số&#10;Trục số biểu diễn số nguyên..."
+                      value={newLessonTheory}
+                      onChange={(e) => setNewLessonTheory(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-y"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateLessonForm(false)}
+                      className="px-4 py-2 border border-slate-200 rounded-xl text-xs text-slate-600 hover:bg-slate-100 cursor-pointer font-semibold"
+                    >
+                      Hủy bỏ
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCreateLesson}
+                      className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer"
+                    >
+                      Lưu bài học
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Subject selector tabs */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Chọn Môn Học</label>
+                <div className="grid grid-cols-4 gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200">
+                  {(["Toán", "Văn", "Tiếng Anh", "KHTN"] as const).map((subjectOption) => (
+                    <button
+                      key={subjectOption}
+                      onClick={() => {
+                        setAdminSelectedSubject(subjectOption);
+                        setAdminExpandedLessonId(null);
+                      }}
+                      className={`py-2 text-[11px] font-bold rounded-lg transition-all text-center cursor-pointer ${
+                        adminSelectedSubject === subjectOption
+                          ? "bg-emerald-600 text-white shadow-sm"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      {subjectOption}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Grade Selector Row based on selected subject */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Chọn Khối Lớp</label>
+                <div className="flex flex-wrap gap-2">
+                  {["Lớp 6", "Lớp 7", "Lớp 8", "Lớp 9"].map((gradeOption) => (
+                    <button
+                      key={gradeOption}
+                      onClick={() => {
+                        setAdminSelectedGrade(gradeOption);
+                        setAdminExpandedLessonId(null);
+                      }}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        adminSelectedGrade === gradeOption
+                          ? "bg-slate-900 text-white shadow-xs"
+                          : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/50"
+                      }`}
+                    >
+                      Khối {gradeOption.split(" ")[1]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Lesson Cards List */}
+              <div className="space-y-4 pt-2">
+                <div className="flex justify-between items-center text-[11px] text-slate-400">
+                  <span>Danh sách học liệu ({curriculumData[adminSelectedGrade]?.[adminSelectedSubject]?.length || 0} bài giảng)</span>
+                  <span>Khối: {adminSelectedGrade} • Môn: {adminSelectedSubject}</span>
+                </div>
+
+                {(!curriculumData[adminSelectedGrade]?.[adminSelectedSubject] || curriculumData[adminSelectedGrade][adminSelectedSubject].length === 0) ? (
+                  <div className="text-center py-12 text-slate-400 border border-dashed border-slate-200 rounded-xl">
+                    <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-30 animate-pulse" />
+                    <p className="text-xs">Chưa có học liệu cho bộ lọc này.</p>
+                  </div>
+                ) : (
+                  curriculumData[adminSelectedGrade][adminSelectedSubject].map((lesson) => {
+                    const isExpanded = adminExpandedLessonId === lesson.id;
+                    return (
+                      <div 
+                        key={lesson.id} 
+                        className={`border rounded-xl transition-all overflow-hidden ${
+                          isExpanded 
+                            ? "border-emerald-500 bg-emerald-50/5 shadow-xs" 
+                            : "border-slate-200 hover:border-slate-300"
+                        }`}
+                      >
+                        {editingLessonId === lesson.id ? (
+                          <div className="p-5 bg-slate-50/50 space-y-4">
+                            <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                              <Pencil className="w-4 h-4 text-emerald-600" />
+                              Chỉnh sửa học liệu tự học
+                            </h4>
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tiêu đề bài học</label>
+                              <input
+                                type="text"
+                                value={editLessonTitle}
+                                onChange={(e) => setEditLessonTitle(e.target.value)}
+                                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tóm tắt ngắn</label>
+                              <input
+                                type="text"
+                                value={editLessonSummary}
+                                onChange={(e) => setEditLessonSummary(e.target.value)}
+                                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nội dung lý thuyết (Hỗ trợ định dạng Markdown)</label>
+                              <textarea
+                                rows={8}
+                                value={editLessonTheory}
+                                onChange={(e) => setEditLessonTheory(e.target.value)}
+                                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
+                              />
+                            </div>
+                            <div className="flex justify-between items-center pt-2">
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteLesson(adminSelectedGrade, adminSelectedSubject, lesson.id)}
+                                className="px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                Xóa bài giảng
+                              </button>
+                              <div className="flex gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingLessonId(null)}
+                                  className="px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-600 cursor-pointer"
                                 >
                                   Hủy
                                 </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateLesson(adminSelectedGrade, adminSelectedSubject, lesson.id)}
+                                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
+                                >
+                                  <Save className="w-4 h-4" />
+                                  Lưu thay đổi
+                                </button>
                               </div>
-                            ) : (
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            {/* Toggle Header */}
+                            <div 
+                              onClick={() => setAdminExpandedLessonId(isExpanded ? null : lesson.id)}
+                              className="p-4 cursor-pointer flex justify-between items-start gap-3"
+                            >
+                              <div className="space-y-1">
+                                <h4 className="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
+                                  <BookOpen className="w-4 h-4 text-emerald-600 shrink-0" />
+                                  {lesson.title}
+                                </h4>
+                                <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2">
+                                  {lesson.summary}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingLessonId(lesson.id);
+                                    setEditLessonTitle(lesson.title);
+                                    setEditLessonSummary(lesson.summary);
+                                    setEditLessonTheory(lesson.theory);
+                                  }}
+                                  className="p-1.5 text-slate-600 hover:text-emerald-700 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1"
+                                >
+                                  <Pencil className="w-3 h-3 text-emerald-600" />
+                                  Sửa
+                                </button>
+                                <span className="p-1.5 text-slate-400 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-bold">
+                                  {isExpanded ? "Đóng" : "Xem nội dung"}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Collapsible Content */}
+                            {isExpanded && (
+                              <div className="px-4 pb-4 border-t border-slate-100 pt-3 space-y-4">
+                                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 leading-relaxed markdown-body">
+                                  <Markdown>{lesson.theory}</Markdown>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
+
+          {adminActiveTab === "kiem-tra" && (
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-5">
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                <div>
+                  <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                    <Award className="w-4.5 h-4.5 text-emerald-600" />
+                    Quản lý Ngân hàng Bài kiểm tra
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Chọn môn học để xem các khối lớp tương ứng</p>
+                </div>
+                <button
+                  onClick={() => setShowCreateQuizForm(!showCreateQuizForm)}
+                  className="flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer shrink-0"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>Tạo đề kiểm tra mới</span>
+                </button>
+              </div>
+
+              {/* Creation Form */}
+              {showCreateQuizForm && (
+                <div className="p-5 border border-amber-200 bg-amber-50/10 rounded-2xl space-y-4 shadow-sm animate-fadeIn">
+                  <div className="flex items-center justify-between border-b border-amber-100 pb-2">
+                    <h4 className="font-bold text-amber-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                      <Plus className="w-4 h-4" />
+                      Tạo Đề kiểm tra Mới ({adminQuizSelectedSubject} - {adminQuizSelectedGrade})
+                    </h4>
+                    <button 
+                      onClick={() => {
+                        setShowCreateQuizForm(false);
+                        setNewQuizQuestions([]);
+                      }}
+                      className="text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer"
+                    >
+                      Đóng
+                    </button>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-slate-600">Tiêu đề đề kiểm tra (Chủ đề)</label>
+                    <input
+                      type="text"
+                      placeholder="Ví dụ: Đề kiểm tra chương 1: Tập hợp số tự nhiên"
+                      value={newQuizTitle}
+                      onChange={(e) => setNewQuizTitle(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                    />
+                  </div>
+
+                  {/* List of currently added questions */}
+                  {newQuizQuestions.length > 0 && (
+                    <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
+                      <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Danh sách câu hỏi đã thêm ({newQuizQuestions.length})</h5>
+                      <div className="space-y-2 divide-y divide-slate-100 max-h-40 overflow-y-auto pr-1">
+                        {newQuizQuestions.map((q, idx) => (
+                          <div key={idx} className="pt-2 first:pt-0 text-xs flex justify-between items-start gap-2">
+                            <div>
+                              <p className="font-semibold text-slate-800">Câu {idx + 1}: {q.question}</p>
+                              <p className="text-[10px] text-emerald-600">Đáp án đúng: {String.fromCharCode(65 + q.correctIndex)}</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setNewQuizQuestions(newQuizQuestions.filter((_, i) => i !== idx))}
+                              className="text-[10px] text-red-500 hover:text-red-700 font-bold shrink-0 cursor-pointer"
+                            >
+                              Xóa
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Question Builder Box */}
+                  <div className="p-4 bg-white border border-dashed border-amber-200 rounded-xl space-y-3">
+                    <h5 className="text-[11px] font-bold text-amber-800 flex items-center gap-1.5">
+                      <PlusCircle className="w-3.5 h-3.5" />
+                      Trình tạo Câu hỏi trắc nghiệm
+                    </h5>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-slate-500">Nội dung câu hỏi</label>
+                      <input
+                        type="text"
+                        placeholder="Nhập nội dung câu hỏi..."
+                        value={newQuestionText}
+                        onChange={(e) => setNewQuestionText(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-500">Phương án A</label>
+                        <input
+                          type="text"
+                          placeholder="Phương án A"
+                          value={newQuestionOptionA}
+                          onChange={(e) => setNewQuestionOptionA(e.target.value)}
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-1 focus:ring-amber-500"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-500">Phương án B</label>
+                        <input
+                          type="text"
+                          placeholder="Phương án B"
+                          value={newQuestionOptionB}
+                          onChange={(e) => setNewQuestionOptionB(e.target.value)}
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-1 focus:ring-amber-500"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-500">Phương án C</label>
+                        <input
+                          type="text"
+                          placeholder="Phương án C"
+                          value={newQuestionOptionC}
+                          onChange={(e) => setNewQuestionOptionC(e.target.value)}
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-1 focus:ring-amber-500"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-500">Phương án D</label>
+                        <input
+                          type="text"
+                          placeholder="Phương án D"
+                          value={newQuestionOptionD}
+                          onChange={(e) => setNewQuestionOptionD(e.target.value)}
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-xl text-xs focus:ring-1 focus:ring-amber-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-500">Chọn đáp án đúng</label>
+                        <select
+                          value={newQuestionCorrectIndex}
+                          onChange={(e) => setNewQuestionCorrectIndex(Number(e.target.value))}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none bg-white"
+                        >
+                          <option value={0}>Phương án A</option>
+                          <option value={1}>Phương án B</option>
+                          <option value={2}>Phương án C</option>
+                          <option value={3}>Phương án D</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-500">Giải thích chi tiết</label>
+                        <input
+                          type="text"
+                          placeholder="Ví dụ: Áp dụng định nghĩa tập hợp N..."
+                          value={newQuestionExplanation}
+                          onChange={(e) => setNewQuestionExplanation(e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-1 focus:ring-amber-500"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleAddQuestionToQuizBuilder}
+                      className="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold rounded-xl shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Thêm câu hỏi này vào đề
+                    </button>
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCreateQuizForm(false);
+                        setNewQuizQuestions([]);
+                      }}
+                      className="px-4 py-2 border border-slate-200 rounded-xl text-xs text-slate-600 hover:bg-slate-100 cursor-pointer font-semibold"
+                    >
+                      Hủy bỏ
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCreateQuiz}
+                      className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer"
+                    >
+                      Lưu và Kích hoạt đề thi ({newQuizQuestions.length} câu)
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Subject selector tabs */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Chọn Môn Học</label>
+                <div className="grid grid-cols-4 gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200">
+                  {(["Toán", "Văn", "Tiếng Anh", "KHTN"] as const).map((subjectOption) => (
+                    <button
+                      key={subjectOption}
+                      onClick={() => {
+                        setAdminQuizSelectedSubject(subjectOption);
+                        setAdminExpandedQuizId(null);
+                      }}
+                      className={`py-2 text-[11px] font-bold rounded-lg transition-all text-center cursor-pointer ${
+                        adminQuizSelectedSubject === subjectOption
+                          ? "bg-emerald-600 text-white shadow-sm"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      {subjectOption}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Grade Selector Row based on selected subject */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Chọn Khối Lớp</label>
+                <div className="flex flex-wrap gap-2">
+                  {["Lớp 6", "Lớp 7", "Lớp 8", "Lớp 9"].map((gradeOption) => (
+                    <button
+                      key={gradeOption}
+                      onClick={() => {
+                        setAdminQuizSelectedGrade(gradeOption);
+                        setAdminExpandedQuizId(null);
+                      }}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        adminQuizSelectedGrade === gradeOption
+                          ? "bg-slate-900 text-white shadow-xs"
+                          : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/50"
+                      }`}
+                    >
+                      Khối {gradeOption.split(" ")[1]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quizzes List */}
+              <div className="space-y-4 pt-2">
+                <div className="flex justify-between items-center text-[11px] text-slate-400">
+                  <span>Ngân hàng bài thi ({curriculumData[adminQuizSelectedGrade]?.[adminQuizSelectedSubject]?.length || 0} bài kiểm tra)</span>
+                  <span>Khối: {adminQuizSelectedGrade} • Môn: {adminQuizSelectedSubject}</span>
+                </div>
+
+                {(!curriculumData[adminQuizSelectedGrade]?.[adminQuizSelectedSubject] || curriculumData[adminQuizSelectedGrade][adminQuizSelectedSubject].length === 0) ? (
+                  <div className="text-center py-12 text-slate-400 border border-dashed border-slate-200 rounded-xl">
+                    <Award className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                    <p className="text-xs">Chưa có đề trắc nghiệm cho bộ lọc này.</p>
+                  </div>
+                ) : (
+                  curriculumData[adminQuizSelectedGrade][adminQuizSelectedSubject].map((lesson) => {
+                    const isExpanded = adminExpandedQuizId === lesson.id;
+                    return (
+                      <div 
+                        key={lesson.id} 
+                        className={`border rounded-xl transition-all overflow-hidden ${
+                          isExpanded 
+                            ? "border-amber-500 bg-amber-50/5 shadow-xs" 
+                            : "border-slate-200 hover:border-slate-300"
+                        }`}
+                      >
+                        {editingQuizId === lesson.id ? (
+                          <div className="p-5 bg-amber-50/10 space-y-4 border-t border-amber-200/40">
+                            <h4 className="font-bold text-amber-800 text-xs uppercase tracking-wider flex items-center gap-1.5 border-b border-amber-100 pb-2">
+                              <Pencil className="w-4 h-4 text-amber-600" />
+                              Chỉnh sửa Đề kiểm tra
+                            </h4>
+                            
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tiêu đề đề thi</label>
+                              <input
+                                type="text"
+                                value={editQuizTitle}
+                                onChange={(e) => setEditQuizTitle(e.target.value)}
+                                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500"
+                              />
+                            </div>
+
+                            {/* List of current questions in edit state */}
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Danh sách câu hỏi ({editQuizQuestions.length})</label>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {editQuizQuestions.map((q, idx) => (
+                                  <div key={idx} className="p-3 bg-white border border-slate-200 rounded-xl space-y-2 relative">
+                                    <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                      <span className="text-[10px] font-bold text-slate-400">Câu {idx + 1}</span>
+                                      <div className="flex gap-1.5">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedQuizQuestionIndex(idx);
+                                            setEditQuizQuestionText(q.question);
+                                            setEditQuizQuestionOptionA(q.options[0] || "");
+                                            setEditQuizQuestionOptionB(q.options[1] || "");
+                                            setEditQuizQuestionOptionC(q.options[2] || "");
+                                            setEditQuizQuestionOptionD(q.options[3] || "");
+                                            setEditQuizQuestionCorrectIndex(q.correctIndex);
+                                            setEditQuizQuestionExplanation(q.explanation || "");
+                                          }}
+                                          className="px-2 py-0.5 text-[9px] font-bold text-amber-700 bg-amber-50 rounded border border-amber-100 hover:bg-amber-100 cursor-pointer"
+                                        >
+                                          Sửa câu hỏi
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setEditQuizQuestions(editQuizQuestions.filter((_, qI) => qI !== idx));
+                                            if (selectedQuizQuestionIndex === idx) {
+                                              setSelectedQuizQuestionIndex(null);
+                                            }
+                                          }}
+                                          className="px-2 py-0.5 text-[9px] font-bold text-red-600 bg-red-50 rounded border border-red-100 hover:bg-red-100 cursor-pointer"
+                                        >
+                                          Xóa
+                                        </button>
+                                      </div>
+                                    </div>
+                                    <p className="text-xs font-bold text-slate-700 line-clamp-2">{q.question}</p>
+                                    <div className="grid grid-cols-2 gap-1 text-[10px] text-slate-500 font-sans">
+                                      {q.options.map((opt: string, oIdx: number) => (
+                                        <div key={oIdx} className={`px-1.5 py-0.5 rounded ${oIdx === q.correctIndex ? "bg-emerald-50 text-emerald-800 font-bold" : ""}`}>
+                                          {String.fromCharCode(65 + oIdx)}. {opt}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Question builder panel for editing */}
+                            <div className="p-4 bg-white border border-amber-200/55 rounded-2xl space-y-3 shadow-xs">
+                              <h5 className="font-bold text-slate-800 text-xs flex items-center gap-1">
+                                {selectedQuizQuestionIndex !== null ? `Cập nhật Câu hỏi ${selectedQuizQuestionIndex + 1}` : "Thêm Câu hỏi mới"}
+                              </h5>
+                              <div className="space-y-1">
+                                <label className="text-[9px] font-bold text-slate-400 uppercase">Nội dung câu hỏi</label>
+                                <input
+                                  type="text"
+                                  value={editQuizQuestionText}
+                                  onChange={(e) => setEditQuizQuestionText(e.target.value)}
+                                  placeholder="Ví dụ: Đâu là kết quả của 2 + 2?"
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                />
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div className="space-y-1">
+                                  <label className="text-[9px] font-bold text-slate-400 uppercase">Đáp án A</label>
+                                  <input
+                                    type="text"
+                                    value={editQuizQuestionOptionA}
+                                    onChange={(e) => setEditQuizQuestionOptionA(e.target.value)}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="text-[9px] font-bold text-slate-400 uppercase">Đáp án B</label>
+                                  <input
+                                    type="text"
+                                    value={editQuizQuestionOptionB}
+                                    onChange={(e) => setEditQuizQuestionOptionB(e.target.value)}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="text-[9px] font-bold text-slate-400 uppercase">Đáp án C</label>
+                                  <input
+                                    type="text"
+                                    value={editQuizQuestionOptionC}
+                                    onChange={(e) => setEditQuizQuestionOptionC(e.target.value)}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="text-[9px] font-bold text-slate-400 uppercase">Đáp án D</label>
+                                  <input
+                                    type="text"
+                                    value={editQuizQuestionOptionD}
+                                    onChange={(e) => setEditQuizQuestionOptionD(e.target.value)}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                  />
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div className="space-y-1">
+                                  <label className="text-[9px] font-bold text-slate-400 uppercase block">Đáp án chính xác</label>
+                                  <select
+                                    value={editQuizQuestionCorrectIndex}
+                                    onChange={(e) => setEditQuizQuestionCorrectIndex(parseInt(e.target.value))}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none cursor-pointer"
+                                  >
+                                    <option value={0}>Phương án A</option>
+                                    <option value={1}>Phương án B</option>
+                                    <option value={2}>Phương án C</option>
+                                    <option value={3}>Phương án D</option>
+                                  </select>
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="text-[9px] font-bold text-slate-400 uppercase">Lời giải chi tiết</label>
+                                  <input
+                                    type="text"
+                                    value={editQuizQuestionExplanation}
+                                    onChange={(e) => setEditQuizQuestionExplanation(e.target.value)}
+                                    placeholder="Giải thích tại sao đáp án này đúng..."
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                                  />
+                                </div>
+                              </div>
+                              <div className="flex justify-end gap-2 pt-1.5">
+                                {selectedQuizQuestionIndex !== null && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedQuizQuestionIndex(null);
+                                      setEditQuizQuestionText("");
+                                      setEditQuizQuestionOptionA("");
+                                      setEditQuizQuestionOptionB("");
+                                      setEditQuizQuestionOptionC("");
+                                      setEditQuizQuestionOptionD("");
+                                      setEditQuizQuestionCorrectIndex(0);
+                                      setEditQuizQuestionExplanation("");
+                                    }}
+                                    className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[11px] font-semibold cursor-pointer"
+                                  >
+                                    Hủy sửa câu
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (!editQuizQuestionText.trim()) {
+                                      alert("Vui lòng điền nội dung câu hỏi!");
+                                      return;
+                                    }
+                                    if (!editQuizQuestionOptionA.trim() || !editQuizQuestionOptionB.trim() || !editQuizQuestionOptionC.trim() || !editQuizQuestionOptionD.trim()) {
+                                      alert("Vui lòng điền đủ 4 phương án!");
+                                      return;
+                                    }
+                                    const qObj = {
+                                      question: editQuizQuestionText,
+                                      options: [editQuizQuestionOptionA, editQuizQuestionOptionB, editQuizQuestionOptionC, editQuizQuestionOptionD],
+                                      correctIndex: editQuizQuestionCorrectIndex,
+                                      explanation: editQuizQuestionExplanation || "Giải thích chi tiết cho đáp án đúng."
+                                    };
+
+                                    if (selectedQuizQuestionIndex !== null) {
+                                      const updatedQuestions = [...editQuizQuestions];
+                                      updatedQuestions[selectedQuizQuestionIndex] = qObj;
+                                      setEditQuizQuestions(updatedQuestions);
+                                      setSelectedQuizQuestionIndex(null);
+                                    } else {
+                                      setEditQuizQuestions([...editQuizQuestions, qObj]);
+                                    }
+
+                                    // clear
+                                    setEditQuizQuestionText("");
+                                    setEditQuizQuestionOptionA("");
+                                    setEditQuizQuestionOptionB("");
+                                    setEditQuizQuestionOptionC("");
+                                    setEditQuizQuestionOptionD("");
+                                    setEditQuizQuestionCorrectIndex(0);
+                                    setEditQuizQuestionExplanation("");
+                                  }}
+                                  className="px-4 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-[11px] font-bold cursor-pointer"
+                                >
+                                  {selectedQuizQuestionIndex !== null ? "Cập nhật câu hỏi" : "Thêm câu hỏi"}
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Quiz buttons */}
+                            <div className="flex justify-between items-center pt-2 border-t border-slate-100">
                               <button
                                 type="button"
-                                onClick={() => {
-                                  setEditingUsername(s.taiKhoan);
-                                  setEditKhoi(s.khoi || "Lớp 8");
-                                }}
-                                className="px-2.5 py-1 text-slate-700 hover:text-emerald-700 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
+                                onClick={() => handleDeleteQuiz(adminQuizSelectedGrade, adminQuizSelectedSubject, lesson.id)}
+                                className="px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
                               >
-                                Sửa Khối
+                                <Trash2 className="w-4 h-4" />
+                                Xóa Đề kiểm tra
                               </button>
+                              <div className="flex gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingQuizId(null)}
+                                  className="px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-600 cursor-pointer"
+                                >
+                                  Hủy
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateQuiz(adminQuizSelectedGrade, adminQuizSelectedSubject, lesson.id)}
+                                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
+                                >
+                                  <Save className="w-4 h-4" />
+                                  Lưu Đề thi ({editQuizQuestions.length} câu)
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            {/* Toggle Header */}
+                            <div 
+                              onClick={() => setAdminExpandedQuizId(isExpanded ? null : lesson.id)}
+                              className="p-4 cursor-pointer flex justify-between items-start gap-3"
+                            >
+                              <div className="space-y-1">
+                                <h4 className="font-bold text-slate-800 text-xs sm:text-sm">
+                                  {lesson.title}
+                                </h4>
+                                <p className="text-[10px] text-slate-500">
+                                  Tổng số câu hỏi: {lesson.questions.length} câu • Điểm số tối đa: 10 điểm
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingQuizId(lesson.id);
+                                    setEditQuizTitle(lesson.title);
+                                    setEditQuizQuestions(lesson.questions || []);
+                                    setSelectedQuizQuestionIndex(null);
+                                    setEditQuizQuestionText("");
+                                    setEditQuizQuestionOptionA("");
+                                    setEditQuizQuestionOptionB("");
+                                    setEditQuizQuestionOptionC("");
+                                    setEditQuizQuestionOptionD("");
+                                    setEditQuizQuestionCorrectIndex(0);
+                                    setEditQuizQuestionExplanation("");
+                                  }}
+                                  className="p-1.5 text-slate-600 hover:text-amber-700 bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-200 rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1"
+                                >
+                                  <Pencil className="w-3 h-3 text-amber-600" />
+                                  Sửa đề
+                                </button>
+                                <span className="p-1.5 text-slate-400 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-bold shrink-0">
+                                  {isExpanded ? "Đóng đề" : "Xem câu hỏi"}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Collapsible Content */}
+                            {isExpanded && (
+                              <div className="px-4 pb-4 border-t border-slate-100 pt-3 space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {lesson.questions.map((q, qIdx) => (
+                                    <div key={qIdx} className="p-4 bg-white border border-slate-200 rounded-xl space-y-3 shadow-xs">
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-[9px] font-bold text-slate-400 uppercase">Câu hỏi {qIdx + 1}</span>
+                                        <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">Đã kích hoạt</span>
+                                      </div>
+                                      <p className="font-bold text-slate-800 text-xs leading-relaxed">{q.question}</p>
+                                      <div className="space-y-1.5">
+                                        {q.options.map((opt, oIdx) => (
+                                          <div 
+                                            key={oIdx} 
+                                            className={`p-2 rounded-lg text-xs flex items-center gap-2 border ${
+                                              oIdx === q.correctIndex
+                                                ? "bg-emerald-50 border-emerald-300 text-emerald-800 font-medium"
+                                                : "bg-slate-50 border-slate-100 text-slate-600"
+                                            }`}
+                                          >
+                                            <span className="font-mono text-[10px] w-4 h-4 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold">
+                                              {String.fromCharCode(65 + oIdx)}
+                                            </span>
+                                            <span>{opt}</span>
+                                            {oIdx === q.correctIndex && <CheckCircle className="w-3.5 h-3.5 text-emerald-600 ml-auto shrink-0" />}
+                                          </div>
+                                        ))}
+                                      </div>
+                                      <div className="mt-3 pt-3 border-t border-slate-100 bg-amber-50/30 p-2.5 rounded-lg text-[11px] text-slate-500 leading-relaxed">
+                                        <strong className="text-amber-800 font-semibold block mb-0.5">Đáp án giải thích chi tiết:</strong>
+                                        {q.explanation}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
                             )}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
           )}
@@ -2227,6 +4024,7 @@ Please use this student profile to customize your teaching. Use the scaffolding 
               </div>
             </div>
           )}
+          </div>
         </main>
       </div>
     );
