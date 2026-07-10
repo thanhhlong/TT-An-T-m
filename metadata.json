@@ -1,0 +1,6 @@
+{
+  "name": "Trình Tạo System Instruction AI Studio",
+  "description": "Ứng dụng giúp giáo viên Việt Nam thiết kế và tạo System Instruction chuyên nghiệp cho các ứng dụng giáo dục trên Google AI Studio.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
