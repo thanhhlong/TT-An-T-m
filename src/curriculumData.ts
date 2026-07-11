@@ -25,63 +25,248 @@ export interface GradeData {
   };
 }
 
-export const CURRICULUM_DATA: { [grade: string]: { [subject: string]: Lesson[] } } = {
-  "Lớp 6": {
+export const CURRICULUM_DATA: { [grade: string]: { [subject: string]: Lesso  "Lớp 6": {
     "Toán": [
       {
         id: "m6-1",
-        title: "Bài 1: Tập hợp các số tự nhiên",
-        summary: "Hiểu khái niệm tập hợp, phần tử thuộc tập hợp và cách biểu diễn tập hợp số tự nhiên N, N*.",
-        theory: `### 1. Khái niệm Tập hợp
-- Tập hợp là một khái niệm cơ bản của toán học. Ví dụ: Tập hợp các học sinh trong lớp, tập hợp các ngón tay trên bàn tay.
-- Các đối tượng trong tập hợp được gọi là **phần tử** của tập hợp đó.
-- Kí hiệu: $a \\in A$ (phần tử $a$ thuộc tập hợp $A$) và $b \\notin A$ (phần tử $b$ không thuộc tập hợp $A$).
+        title: "Bài 1: Tập hợp và phần tử của tập hợp",
+        summary: "Hiểu khái niệm tập hợp, cách viết tập hợp bằng liệt kê hoặc chỉ ra tính chất đặc trưng, tập hợp số tự nhiên ℕ và ℕ*.",
+        theory: `### 1. Tập hợp và Phần tử
+- **Tập hợp** (gọi tắt là tập) bao gồm những đối tượng nhất định. Các đối tượng này được gọi là **phần tử** của tập hợp.
+- Ví dụ: Tập hợp các bông hồng trong lọ hoa, tập hợp ba con cá vàng trong bình, tập hợp các học sinh trong lớp.
+- Kí hiệu:
+  - $x \\in A$ (đọc là $x$ thuộc $A$, nghĩa là $x$ là phần tử của $A$).
+  - $y \\notin A$ (đọc là $y$ không thuộc $A$, nghĩa là $y$ không phải phần tử của $A$).
+- Người ta thường đặt tên tập hợp bằng chữ cái in hoa như $A, B, C, M, N...$
 
-### 2. Cách viết một tập hợp
-Có hai cách thường dùng để viết một tập hợp:
-1. **Liệt kê các phần tử**: Viết các phần tử trong cặp ngoặc nhọn $\\{ \\}$, cách nhau bởi dấu chấm phẩy ";". Mỗi phần tử được viết một lần.
-   *Ví dụ:* $A = \\{1; 2; 3; 4\\}$
-2. **Chỉ ra tính chất đặc trưng**: Chỉ ra dấu hiệu nhận biết chung của các phần tử.
-   *Ví dụ:* $A = \\{x \\in \\mathbb{N} \\mid x < 5\\}$
+### 2. Mô tả một tập hợp (Cách viết tập hợp)
+Có hai cách thường dùng để mô tả một tập hợp:
+1. **Cách 1: Liệt kê các phần tử của tập hợp.**
+   - Ta viết các phần tử trong cặp ngoặc nhọn $\\{ \\}$, cách nhau bởi dấu chấm phẩy ";".
+   - Mỗi phần tử được liệt kê đúng một lần, thứ tự liệt kê tùy ý.
+   - *Ví dụ:* Tập hợp các số tự nhiên chẵn nhỏ hơn 10: $C = \\{0; 2; 4; 6; 8\\}$.
+2. **Cách 2: Nêu dấu hiệu đặc trưng cho các phần tử của tập hợp.**
+   - Chỉ ra thuộc tính chung của tất cả các phần tử.
+   - *Ví dụ:* $C = \\{n \\in \\mathbb{N} \\mid n \\text{ là số chẵn và } n < 10\\}$.
 
-### 3. Tập hợp các số tự nhiên $\\mathbb{N}$ và $\\mathbb{N}^*$
-- Tập hợp các số tự nhiên kí hiệu là $\\mathbb{N} = \\{0; 1; 2; 3; ...\\}$.
-- Tập hợp các số tự nhiên khác 0 kí hiệu là $\\mathbb{N}^* = \\{1; 2; 3; 4; ...\\}$.`,
+### 3. Tập hợp số tự nhiên $\\mathbb{N}$ và $\\mathbb{N}^*$
+- Tập hợp các số tự nhiên được kí hiệu là $\\mathbb{N}$: $\\mathbb{N} = \\{0; 1; 2; 3; 4; ...\\}$.
+- Tập hợp các số tự nhiên khác 0 được kí hiệu là $\\mathbb{N}^*$: $\\mathbb{N}^* = \\{1; 2; 3; 4; ...\\}$.
+- *Lưu ý:* Kí hiệu $x \\in \\mathbb{N} \\mid x < 5$ nghĩa là $x$ là số tự nhiên từ $0$ đến $4$.`,
         questions: [
           {
-            question: "Cho tập hợp A = {2; 4; 6; 8}. Phát biểu nào sau đây là ĐÚNG?",
+            question: "Cho tập hợp M = {x ∈ N* | x < 5}. Hãy viết tập hợp M dưới dạng liệt kê các phần tử.",
             options: [
-              "2 không thuộc A",
-              "5 thuộc A",
-              "8 thuộc A",
-              "A chỉ có 3 phần tử"
-            ],
-            correctIndex: 2,
-            explanation: "Tập hợp A chứa các số chẵn 2, 4, 6, 8. Do đó phần tử 8 thuộc tập hợp A, viết là 8 ∈ A."
-          },
-          {
-            question: "Kí hiệu N* dùng để chỉ tập hợp nào?",
-            options: [
-              "Tập hợp các số tự nhiên gồm cả số 0",
-              "Tập hợp các số tự nhiên khác 0",
-              "Tập hợp các số nguyên âm",
-              "Tập hợp các số thập phân"
+              "M = {0; 1; 2; 3; 4}",
+              "M = {1; 2; 3; 4}",
+              "M = {1; 2; 3; 4; 5}",
+              "M = {0; 1; 2; 3; 4; 5}"
             ],
             correctIndex: 1,
-            explanation: "Kí hiệu N* chỉ tập hợp các số tự nhiên khác 0: N* = {1; 2; 3; 4; ...}."
+            explanation: "Tập hợp M chứa các số tự nhiên thuộc N* (nghĩa là khác 0) và nhỏ hơn 5. Các số đó là 1, 2, 3, 4. Do đó M = {1; 2; 3; 4}."
+          },
+          {
+            question: "Cho tập hợp A = {x; y; z}. Phát biểu nào sau đây là SAI?",
+            options: [
+              "x ∈ A",
+              "w ∉ A",
+              "y ∈ A",
+              "A = {z; x; w}"
+            ],
+            correctIndex: 3,
+            explanation: "Tập hợp A gồm ba phần tử x, y, z. Phát biểu 'A = {z; x; w}' là sai vì phần tử 'w' không nằm trong tập hợp A ban đầu."
           }
         ]
       },
       {
         id: "m6-2",
-        title: "Bài 2: Phép tính lũy thừa với số mũ tự nhiên",
-        summary: "Cách viết gọn phép nhân nhiều thừa số giống nhau và các công thức nhân, chia hai lũy thừa cùng cơ số.",
-        theory: `### 1. Khái niệm lũy thừa
-Lũy thừa bậc $n$ của một số tự nhiên $a$ là tích của $n$ thừa số bằng nhau, mỗi thừa số bằng $a$:
-$$a^n = a \\cdot a \\cdot a \\dots a \\quad (n \\text{ thừa số } a, n \\in \\mathbb{N}^*)$$
-- $a$: Gọi là **Cơ số**.
-- $n$: Gọi là **Số mũ**.
-- Quy ước: $a^1 = a$ và $a^0 = 1$ (với $a \\neq 0$).
+        title: "Bài 2: Cách ghi số tự nhiên",
+        summary: "Làm quen với hệ thập phân, giá trị các chữ số theo hàng, lớp và cách biểu diễn số La Mã từ 1 đến 30.",
+        theory: `### 1. Hệ thập phân (Hệ mười)
+- Trong hệ thập phân, mỗi số tự nhiên được viết dưới dạng một dãy chữ số lấy từ 10 chữ số: $0; 1; 2; 3; 4; 5; 6; 7; 8; 9$.
+- **Giá trị vị trí**: Cứ 10 đơn vị ở một hàng thì làm thành 1 đơn vị ở hàng liền trước nó.
+- Cấu trúc biểu diễn số tự nhiên:
+  - $\\overline{ab} = a \\times 10 + b$ (với $a \\neq 0$).
+  - $\\overline{abc} = a \\times 100 + b \\times 10 + c$ (với $a \\neq 0$).
+  - *Ví dụ:* Số $236 = 2 \\times 100 + 3 \\times 10 + 6$.
+
+### 2. Các lớp và hàng số tự nhiên
+Số tự nhiên lớn được phân tách thành các **lớp**: lớp triệu, lớp nghìn, lớp đơn vị. Mỗi lớp gồm 3 hàng: hàng trăm, hàng chục, hàng đơn vị của lớp đó.
+
+### 3. Số La Mã
+Hệ số La Mã sử dụng các chữ số cơ bản: $\\mathrm{I} = 1$, $\\mathrm{V} = 5$, $\\mathrm{X} = 10$.
+- Số từ 1 đến 10: $\\mathrm{I, II, III, IV, V, VI, VII, VIII, IX, X}$.
+- Số từ 11 đến 20: Thêm chữ số $\\mathrm{X}$ vào bên trái các số từ 1 đến 10 (ví dụ: $\\mathrm{XIV} = 14$, $\\mathrm{XX} = 20$).
+- Số từ 21 đến 30: Thêm hai chữ số $\\mathrm{XX}$ vào bên trái các số từ 1 đến 10 (ví dụ: $\\mathrm{XXIV} = 24$, $\\mathrm{XXX} = 30$).
+- *Quy tắc:* Không được ghép quá ba ký tự $\\mathrm{I}$ hoặc $\\mathrm{X}$ đứng liền nhau.`,
+        questions: [
+          {
+            question: "Hãy biểu diễn số 27 dưới dạng số La Mã.",
+            options: [
+              "XXVII",
+              "XXVI",
+              "XXVIII",
+              "IXXV"
+            ],
+            correctIndex: 0,
+            explanation: "Số 27 = 20 + 7. Trong hệ La Mã, 20 được biểu diễn là XX, và 7 được biểu diễn là VII. Kết hợp lại ta được XXVII."
+          },
+          {
+            question: "Giá trị của chữ số 5 trong số tự nhiên 15 284 là bao nhiêu?",
+            options: [
+              "5 đơn vị",
+              "500 đơn vị",
+              "5 000 đơn vị",
+              "50 000 đơn vị"
+            ],
+            correctIndex: 2,
+            explanation: "Trong số 15 284, chữ số 5 nằm ở hàng nghìn, nên nó có giá trị biểu diễn là 5 000."
+          }
+        ]
+      },
+      {
+        id: "m6-3",
+        title: "Bài 3: Thứ tự trong tập hợp các số tự nhiên",
+        summary: "Biểu diễn số tự nhiên trên tia số, so sánh hai số tự nhiên, tính chất bắc cầu và các kí hiệu ≤, ≥.",
+        theory: `### 1. Tia số và Biểu diễn số tự nhiên
+- Tập hợp các số tự nhiên được biểu diễn trực quan trên một tia gốc $O$ gọi là **tia số**.
+- Điểm gốc $O$ biểu diễn số $0$. Mỗi số tự nhiên $a$ được biểu diễn bởi một điểm trên tia số gọi là **điểm $a$**.
+- Trên tia số nằm ngang, điểm biểu diễn số nhỏ hơn nằm ở bên trái điểm biểu diễn số lớn hơn.
+
+### 2. So sánh hai số tự nhiên
+- Trong hai số tự nhiên khác nhau, luôn có một số nhỏ hơn số kia. Nếu $a$ nhỏ hơn $b$, ta viết $a < b$ hoặc $b > a$.
+- **Kí hiệu $\\le$ và $\\ge$**:
+  - $a \\le b$ nghĩa là $a < b$ hoặc $a = b$ (đọc là $a$ nhỏ hơn hoặc bằng $b$).
+  - $a \\ge b$ nghĩa là $a > b$ hoặc $a = b$ (đọc là $a$ lớn hơn hoặc bằng $b$).
+- **Tính chất bắc cầu**: Nếu $a < b$ và $b < c$ thì $a < c$.
+- Mỗi số tự nhiên có một số liền sau duy nhất (cách nó 1 đơn vị). Số liền sau của $a$ là $a+1$. Số $0$ không có số tự nhiên liền trước.`,
+        questions: [
+          {
+            question: "Cho ba số tự nhiên a, b, c biết: a < 15, b > 18, c là số tự nhiên nằm giữa a và b. Khẳng định nào sau đây là LUÔN ĐÚNG?",
+            options: [
+              "a > b",
+              "b < c",
+              "a < c < b",
+              "c < a"
+            ],
+            correctIndex: 2,
+            explanation: "Vì c nằm giữa a và b trên tia số, ta luôn có thứ tự tăng dần là a < c < b."
+          },
+          {
+            question: "Tập hợp các số tự nhiên x sao cho 12 ≤ x < 15 gồm các phần tử nào?",
+            options: [
+              "{12; 13; 14; 15}",
+              "{13; 14}",
+              "{12; 13; 14}",
+              "{13; 14; 15}"
+            ],
+            correctIndex: 2,
+            explanation: "Kí hiệu 12 ≤ x có lấy dấu bằng (x nhận giá trị 12), x < 15 không lấy dấu bằng (x không nhận giá trị 15). Các số tự nhiên thỏa mãn là {12; 13; 14}."
+          }
+        ]
+      },
+      {
+        id: "m6-4",
+        title: "Bài 4: Phép cộng và phép trừ số tự nhiên",
+        summary: "Nắm vững quy tắc cộng, trừ số tự nhiên, các tính chất giao hoán, kết hợp, trừ một tổng và ứng dụng tính nhanh.",
+        theory: `### 1. Phép cộng số tự nhiên
+- Phép cộng hai số tự nhiên $a$ và $b$ cho ta một số tự nhiên duy nhất $c$ gọi là tổng của chúng:
+  $$a + b = c \\quad (\\text{Số hạng} + \\text{Số hạng} = \\text{Tổng})$$
+- **Tính chất phép cộng**:
+  - **Giao hoán**: $a + b = b + a$.
+  - **Kết hợp**: $(a + b) + c = a + (b + c)$.
+  - **Cộng với số 0**: $a + 0 = 0 + a = a$.
+
+### 2. Phép trừ số tự nhiên
+- Cho hai số tự nhiên $a$ và $b$, nếu có số tự nhiên $x$ sao cho $b + x = a$ thì ta có phép trừ:
+  $$a - b = x \\quad (\\text{Số bị trừ} - \\text{Số trừ} = \\text{Hiệu})$$
+- *Điều kiện thực hiện phép trừ*: Phép trừ $a - b$ chỉ thực hiện được trong tập hợp số tự nhiên nếu $a \\ge b$.
+- **Mô phỏng phép cộng và phép trừ trên tia số**:
+  - Khi cộng $a + b$, ta xuất phát từ điểm $a$ và dịch chuyển sang bên phải $b$ đơn vị.
+  - Khi trừ $a - b$, ta xuất phát từ điểm $a$ và dịch chuyển sang bên trái $b$ đơn vị.`,
+        questions: [
+          {
+            question: "Tính nhanh tổng sau: 117 + 68 + 23",
+            options: [
+              "208",
+              "200",
+              "218",
+              "198"
+            ],
+            correctIndex: 0,
+            explanation: "Sử dụng tính chất giao hoán và kết hợp: (117 + 23) + 68 = 140 + 68 = 208."
+          },
+          {
+            question: "Phép trừ 105 - 120 có thực hiện được trong tập hợp số tự nhiên N không?",
+            options: [
+              "Có, kết quả là 15",
+              "Có, kết quả là -15",
+              "Không thực hiện được vì số bị trừ nhỏ hơn số trừ",
+              "Không thực hiện được vì kết quả bằng 0"
+            ],
+            correctIndex: 2,
+            explanation: "Trong tập hợp số tự nhiên, phép trừ a - b chỉ thực hiện được khi a ≥ b. Vì 105 < 120 nên phép trừ này không thực hiện được trên tập N."
+          }
+        ]
+      },
+      {
+        id: "m6-5",
+        title: "Bài 5: Phép nhân và phép chia số tự nhiên",
+        summary: "Tính chất giao hoán, kết hợp, phân phối của phép nhân. Phép chia hết và phép chia có dư.",
+        theory: `### 1. Phép nhân số tự nhiên
+- Phép nhân hai số tự nhiên $a$ và $b$ cho ta tích $c$:
+  $$a \\times b = c \\quad \\text{hoặc} \\quad a \\cdot b = c$$
+- **Tính chất phép nhân**:
+  - **Giao hoán**: $a \\cdot b = b \\cdot a$.
+  - **Kết hợp**: $(a \\cdot b) \\cdot c = a \\cdot (b \\cdot c)$.
+  - **Nhân với số 1**: $a \\cdot 1 = a$.
+  - **Tính chất phân phối của phép nhân đối với phép cộng/phép trừ**: $a \\cdot (b \\pm c) = a \\cdot b \\pm a \\cdot c$.
+
+### 2. Phép chia hết và Phép chia có dư
+Với hai số tự nhiên $a$ và $b$ ($b \\neq 0$), luôn tìm được hai số tự nhiên $q$ và $r$ duy nhất sao cho:
+$$a = b \\cdot q + r \\quad \\text{với } 0 \\le r < b$$
+- **Phép chia hết**: Nếu $r = 0$, ta nói $a$ chia hết cho $b$ (kí hiệu $a \\vdots b$), ta có phép chia hết $a : b = q$.
+- **Phép chia có dư**: Nếu $r > 0$, ta nói $a$ không chia hết cho $b$, ta có phép chia có dư với $q$ là thương và $r$ là số dư.
+- *Chú ý quan trọng*: Số dư $r$ bao giờ cũng phải nhỏ hơn số chia $b$.`,
+        questions: [
+          {
+            question: "Trong một phép chia có dư cho số chia là 8, số dư lớn nhất có thể có là bao nhiêu?",
+            options: [
+              "8",
+              "7",
+              "9",
+              "1"
+            ],
+            correctIndex: 1,
+            explanation: "Số dư r luôn phải nhỏ hơn số chia b. Số chia là 8 nên số dư r phải nhỏ hơn 8. Số tự nhiên lớn nhất nhỏ hơn 8 là 7."
+          },
+          {
+            question: "Tính nhẩm nhanh tích sau bằng tính chất phân phối: 24 * 25",
+            options: [
+              "500",
+              "600",
+              "550",
+              "450"
+            ],
+            correctIndex: 1,
+            explanation: "Ta có thể phân tích: 24 * 25 = (6 * 4) * 25 = 6 * (4 * 25) = 6 * 100 = 600. Hoặc sử dụng 24 * 25 = 24 * (100 / 4) = 2400 / 4 = 600."
+          }
+        ]
+      },
+      {
+        id: "m6-6",
+        title: "Bài 6: Lũy thừa với số mũ tự nhiên",
+        summary: "Lũy thừa bậc n, cơ số, số mũ. Các công thức nhân và chia hai lũy thừa cùng cơ số.",
+        theory: `### 1. Khái niệm Lũy thừa
+- Lũy thừa bậc $n$ của số tự nhiên $a$ là tích của $n$ thừa số bằng nhau, mỗi thừa số bằng $a$:
+  $$a^n = \\underbrace{a \\cdot a \\cdot a \\dots a}_{n \\text{ thừa số a}} \\quad (a \\in \\mathbb{N}, n \\in \\mathbb{N}^*)$$
+- Trong biểu thức $a^n$:
+  - $a$ được gọi là **Cơ số**.
+  - $n$ được gọi là **Số mũ**.
+- Đọc là: "$a$ mũ $n$" hoặc "lũy thừa bậc $n$ của $a$".
+- **Bình phương**: Lũy thừa bậc 2 (ví dụ $a^2$ đọc là $a$ bình phương).
+- **Lập phương**: Lũy thừa bậc 3 (ví dụ $a^3$ đọc là $a$ lập phương).
+- **Quy ước**: $a^1 = a$ và $a^0 = 1$ (với $a \\neq 0$).
 
 ### 2. Nhân hai lũy thừa cùng cơ số
 Khi nhân hai lũy thừa cùng cơ số, ta **giữ nguyên cơ số** và **cộng các số mũ**:
@@ -92,12 +277,376 @@ Khi chia hai lũy thừa cùng cơ số (khác 0), ta **giữ nguyên cơ số**
 $$a^m : a^n = a^{m-n} \\quad (a \\neq 0, m \\ge n)$$`,
         questions: [
           {
-            question: "Viết tích 3 * 3 * 3 * 3 dưới dạng lũy thừa ta được kết quả nào?",
+            question: "Viết biểu thức 5^6 * 5^2 : 5^3 dưới dạng một lũy thừa đơn giản.",
             options: [
-              "3 * 4",
-              "4^3",
-              "3^4",
+              "5^5",
+              "5^11",
+              "5^4",
+              "5^1"
+            ],
+            correctIndex: 0,
+            explanation: "Áp dụng các công thức: 5^6 * 5^2 = 5^(6+2) = 5^8. Sau đó thực hiện phép chia: 5^8 : 5^3 = 5^(8-3) = 5^5."
+          },
+          {
+            question: "Tìm số tự nhiên x biết x^3 = 27.",
+            options: [
+              "x = 9",
+              "x = 3",
+              "x = 2",
+              "x = 4"
+            ],
+            correctIndex: 1,
+            explanation: "Vì 3^3 = 3 * 3 * 3 = 27, nên số tự nhiên x thỏa mãn x^3 = 27 là x = 3."
+          }
+        ]
+      },
+      {
+        id: "m6-7",
+        title: "Bài 7: Thứ tự thực hiện các phép tính",
+        summary: "Quy tắc ưu tiên thực hiện phép tính trong biểu thức không có ngoặc và biểu thức có ngoặc.",
+        theory: `### 1. Đối với biểu thức không có dấu ngoặc
+- Nếu chỉ có phép cộng, trừ hoặc chỉ có phép nhân, chia: Ta thực hiện các phép tính theo thứ tự **từ trái sang phải**.
+- Nếu có các phép tính cộng, trừ, nhân, chia, nâng lên lũy thừa: Ta thực hiện theo thứ tự:
+  $$\\text{Lũy thừa} \\rightarrow \\text{Nhân và chia} \\rightarrow \\text{Cộng và trừ}$$
+
+### 2. Đối với biểu thức có dấu ngoặc
+Nếu biểu thức có các dấu ngoặc: ngoặc tròn $($ $)$, ngoặc vuông $[$ $]$, ngoặc nhọn $\\{$ $\\}$, ta thực hiện phép tính theo thứ tự:
+$$\\text{Trong ngoặc tròn } (\\quad) \\rightarrow \\text{Trong ngoặc vuông } [\\quad] \\rightarrow \\text{Trong ngoặc nhọn } \\{\\quad\\}$$
+
+- *Ví dụ minh họa:* Tính giá trị biểu thức $A = 8 + 36 : 3 \\cdot 2$.
+  - Thực hiện chia: $36 : 3 = 12$.
+  - Thực hiện nhân: $12 \\cdot 2 = 24$.
+  - Thực hiện cộng: $8 + 24 = 32$.
+  - Vậy $A = 32$. (Lưu ý không lấy 3 nhân 2 trước vì nhân và chia có độ ưu tiên ngang nhau, phải làm từ trái sang phải).`,
+        questions: [
+          {
+            question: "Tính giá trị biểu thức: 5 + 3 * 2^3",
+            options: [
+              "64",
+              "29",
+              "41",
+              "32"
+            ],
+            correctIndex: 1,
+            explanation: "Thực hiện lũy thừa trước: 2^3 = 8. Sau đó thực hiện phép nhân: 3 * 8 = 24. Cuối cùng thực hiện phép cộng: 5 + 24 = 29."
+          },
+          {
+            question: "Giá trị của biểu thức B = 50 - [30 - (10 - 5)^2] là bao nhiêu?",
+            options: [
+              "25",
+              "45",
+              "40",
+              "49"
+            ],
+            correctIndex: 1,
+            explanation: "Thực hiện trong ngoặc tròn trước: (10 - 5) = 5. Lũy thừa: 5^2 = 25. Thực hiện trong ngoặc vuông: 30 - 25 = 5. Cuối cùng thực hiện phép trừ ngoài cùng: 50 - 5 = 45."
+          }
+        ]
+      },
+      {
+        id: "m6-8",
+        title: "Bài 8: Quan hệ chia hết và tính chất chia hết",
+        summary: "Định nghĩa chia hết, ước và bội, tính chất chia hết của một tổng các số hạng.",
+        theory: `### 1. Quan hệ chia hết
+- Cho hai số tự nhiên $a$ và $b$ ($b \\neq 0$). Nếu có số tự nhiên $q$ sao cho $a = b \\cdot q$, ta nói **$a$ chia hết cho $b$** và kí hiệu là **$a \\vdots b$**.
+- Nếu $a \\vdots b$, ta gọi:
+  - $a$ là **bội** của $b$.
+  - $b$ là **ước** của $a$.
+- Tập hợp các ước của $a$ kí hiệu là $\\mathrm{U}(a)$. Tập hợp các bội của $b$ kí hiệu là $\\mathrm{B}(b)$.
+- **Cách tìm ước**: Lần lượt chia $a$ cho các số tự nhiên từ $1$ đến $a$ để xem $a$ chia hết cho những số nào.
+- **Cách tìm bội**: Nhân $b$ lần lượt with các số tự nhiên $0; 1; 2; 3; 4; ...$
+
+### 2. Tính chất chia hết của một tổng
+- **Tính chất 1 (Tất cả số hạng đều chia hết)**: Nếu tất cả các số hạng của một tổng đều chia hết cho cùng một số thì tổng đó chia hết cho số đó:
+  $$a \\vdots m \\text{ và } b \\vdots m \\implies (a+b) \\vdots m$$
+- **Tính chất 2 (Chỉ có một số hạng không chia hết)**: Nếu chỉ có đúng một số hạng của tổng không chia hết cho một số, các số hạng còn lại đều chia hết cho số đó thì tổng không chia hết cho số đó:
+  $$a \\not\\vdots m \\text{ và } b \\vdots m \\implies (a+b) \\not\\vdots m$$`,
+        questions: [
+          {
+            question: "Tập hợp các ước của số 12 là tập hợp nào?",
+            options: [
+              "{1; 2; 3; 4; 6; 12}",
+              "{0; 12; 24; 36}",
+              "{2; 3; 4; 6}",
+              "{1; 2; 3; 4; 5; 6; 12}"
+            ],
+            correctIndex: 0,
+            explanation: "Số 12 chia hết cho các số: 1, 2, 3, 4, 6, 12. Do đó tập hợp ước của 12 là U(12) = {1; 2; 3; 4; 6; 12}."
+          },
+          {
+            question: "Không thực hiện phép tính, hãy cho biết tổng A = 24 + 36 + 15 chia hết cho số nào dưới đây?",
+            options: [
+              "6",
+              "3",
+              "9",
+              "4"
+            ],
+            correctIndex: 1,
+            explanation: "Ta thấy 24 chia hết cho 3, 36 chia hết cho 3, và 15 cũng chia hết cho 3. Theo tính chất 1, tổng A chia hết cho 3."
+          }
+        ]
+      },
+      {
+        id: "m6-9",
+        title: "Bài 9: Dấu hiệu chia hết cho 2, 5, 9, 3",
+        summary: "Nhận biết nhanh các số chia hết cho 2 và 5 dựa vào chữ số tận cùng, chia hết cho 3 và 9 dựa vào tổng các chữ số.",
+        theory: `### 1. Dấu hiệu chia hết cho 2 và cho 5
+- **Chia hết cho 2**: Các số có chữ số tận cùng là chữ số chẵn: $0, 2, 4, 6, 8$ thì chia hết cho 2 và chỉ những số đó mới chia hết cho 2.
+- **Chia hết cho 5**: Các số có chữ số tận cùng là $0$ hoặc $5$ thì chia hết cho 5 và chỉ những số đó mới chia hết cho 5.
+- *Lưu ý*: Các số có chữ số tận cùng là $0$ thì chia hết cho cả 2 và 5.
+
+### 2. Dấu hiệu chia hết cho 9 và cho 3
+- **Chia hết cho 9**: Các số có **tổng các chữ số** chia hết cho 9 thì chia hết cho 9 và chỉ những số đó mới chia hết cho 9.
+- **Chia hết cho 3**: Các số có **tổng các chữ số** chia hết cho 3 thì chia hết cho 3 và chỉ những số đó mới chia hết cho 3.
+- *Chú ý*: Một số chia hết cho 9 thì chắc chắn chia hết cho 3. Ngược lại, một số chia hết cho 3 chưa chắc đã chia hết cho 9.`,
+        questions: [
+          {
+            question: "Số nào dưới đây đồng thời chia hết cho cả 2; 5 và 9?",
+            options: [
+              "190",
+              "270",
+              "275",
+              "450"
+            ],
+            correctIndex: 1,
+            explanation: "Để chia hết cho cả 2 và 5, chữ số tận cùng của số đó phải là 0 (loại 275). Để chia hết cho 9, tổng các chữ số phải chia hết cho 9. Trong các số còn lại, số 270 có 2+7+0=9 chia hết cho 9 (đúng). Số 190 có 1+9+0=10 không chia hết cho 9."
+          },
+          {
+            question: "Tìm chữ số * thích hợp để số 15* chia hết cho 3 nhưng không chia hết cho 9.",
+            options: [
+              "* = 3",
+              "* = 0",
+              "* = 6",
+              "* = 0 hoặc * = 6"
+            ],
+            correctIndex: 3,
+            explanation: "Tổng các chữ số là 1 + 5 + * = 6 + *. Để chia hết cho 3, tổng này phải là 6, 9, 12, 15... nghĩa là * có thể là 0, 3, 6, 9. Nếu * = 3, số là 153 có tổng bằng 9 chia hết cho 9 (loại). Nếu * = 9, số là 159 có tổng bằng 15 chia hết cho 3 nhưng không chia hết cho 9 (đúng). Nếu * = 0 hoặc * = 6 thì tổng lần loạt là 6 và 12 đều chia hết cho 3 và không chia hết cho 9."
+          }
+        ]
+      },
+      {
+        id: "m6-10",
+        title: "Bài 10: Số nguyên tố và Hợp số",
+        summary: "Định nghĩa số nguyên tố, hợp số, số đặc biệt 0 và 1, cách phân tích một số ra thừa số nguyên tố.",
+        theory: `### 1. Số nguyên tố và Hợp số
+- **Số nguyên tố**: Là số tự nhiên **lớn hơn 1**, chỉ có đúng hai ước là $1$ và chính nó.
+  - Các số nguyên tố nhỏ hơn 10 là: $2, 3, 5, 7$. Số 2 là số nguyên tố chẵn duy nhất.
+- **Hợp số**: Là số tự nhiên **lớn hơn 1**, có nhiều hơn hai ước (tức là ngoài 1 và chính nó, nó còn có ước khác).
+  - Ví dụ: Số $4$ (có ước là 1, 2, 4), số $6$, số $9$.
+- **Trường hợp đặc biệt**: Các số $0$ và $1$ không phải là số nguyên tố và cũng không phải là hợp số.
+
+### 2. Phân tích một số ra thừa số nguyên tố
+- Phân tích một số tự nhiên lớn hơn 1 ra thừa số nguyên tố là viết số đó dưới dạng một tích các thừa số nguyên tố.
+- Có hai cách sơ đồ hóa thường dùng:
+  1. **Sơ đồ cây**: Tách số thành tích hai thừa số, tiếp tục tách các hợp số cho đến khi tất cả các nhánh đều là số nguyên tố.
+  2. **Sơ đồ cột**: Chia số đó cho số nguyên tố nhỏ nhất mà nó chia hết, viết thương dưới số đó rồi tiếp tục chia cho đến khi thương bằng 1.`,
+        questions: [
+          {
+            question: "Trong các khẳng định sau, khẳng định nào đúng?",
+            options: [
+              "Mọi số nguyên tố đều là số lẻ",
+              "Số 2 là số nguyên tố chẵn duy nhất",
+              "Số 1 là số nguyên tố nhỏ nhất",
+              "Hợp số có thể có đúng hai ước"
+            ],
+            correctIndex: 1,
+            explanation: "Số 2 là số chẵn và chỉ có hai ước là 1 và 2 nên là số nguyên tố chẵn duy nhất. Số 1 không phải số nguyên tố."
+          },
+          {
+            question: "Kết quả phân tích số 60 ra thừa số nguyên tố là biểu thức nào?",
+            options: [
+              "2 * 3 * 10",
+              "4 * 3 * 5",
+              "2^2 * 3 * 5",
+              "2 * 3^2 * 5"
+            ],
+            correctIndex: 2,
+            explanation: "Ta chia 60 : 2 = 30; 30 : 2 = 15; 15 : 3 = 5; 5 : 5 = 1. Kết quả tích lũy là 2 * 2 * 3 * 5 = 2^2 * 3 * 5. Các đáp án khác chứa hợp số 10 hoặc 4."
+          }
+        ]
+      },
+      {
+        id: "m6-11",
+        title: "Bài 11: Ước chung và Ước chung lớn nhất (ƯCLN)",
+        summary: "Tìm ước chung, tìm ƯCLN bằng phân tích thừa số nguyên tố, ứng dụng rút gọn phân số.",
+        theory: `### 1. Ước chung
+- Một số được gọi là **ước chung** của hai hay nhiều số nếu nó là ước của tất cả các số đó.
+- Tập hợp ước chung của $a$ và $b$ kí hiệu là $\\mathrm{U'C}(a, b)$.
+
+### 2. Ước chung lớn nhất (ƯCLN)
+- **ƯCLN** của hai hay nhiều số là số lớn nhất trong tập hợp các ước chung của các số đó. Kí hiệu là $\\mathrm{U'CLN}(a, b)$.
+- **Cách tìm ƯCLN bằng cách phân tích thừa số nguyên tố**:
+  - *Bước 1*: Phân tích mỗi số ra thừa số nguyên tố.
+  - *Bước 2*: Chọn ra các thừa số nguyên tố **chung**.
+  - *Bước 3*: Lập tích các thừa số đã chọn, mỗi thừa số lấy với **số mũ nhỏ nhất**. Tích đó là ƯCLN cần tìm.
+- **Hai số nguyên tố cùng nhau**: Là hai số tự nhiên có ƯCLN bằng 1 (ví dụ 8 và 9).
+
+### 3. Ứng dụng: Rút gọn phân số về tối giản
+- Để rút gọn phân số $\\frac{a}{b}$ về phân số tối giản, ta chia cả tử và mẫu cho $\\mathrm{U'CLN}(a, b)$.`,
+        questions: [
+          {
+            question: "Tìm ƯCLN của hai số 18 và 30.",
+            options: [
+              "3",
+              "6",
+              "9",
+              "2"
+            ],
+            correctIndex: 1,
+            explanation: "Phân tích: 18 = 2 * 3^2; 30 = 2 * 3 * 5. Thừa số chung là 2 và 3. Số mũ nhỏ nhất là 2^1 và 3^1. Vậy ƯCLN(18, 30) = 2 * 3 = 6."
+          },
+          {
+            question: "Rút gọn phân số 24/36 về tối giản bằng cách chia cả tử và mẫu cho ƯCLN của chúng. Phân số thu được là:",
+            options: [
+              "12/18",
+              "2/3",
+              "4/6",
+              "3/4"
+            ],
+            correctIndex: 1,
+            explanation: "ƯCLN(24, 36) = 12. Chia cả tử và mẫu cho 12 ta được: (24 : 12) / (36 : 12) = 2/3."
+          }
+        ]
+      },
+      {
+        id: "m6-12",
+        title: "Bài 12: Bội chung và Bội chung nhỏ nhất (BCNN)",
+        summary: "Tìm bội chung, tìm BCNN bằng phân tích thừa số nguyên tố, ứng dụng quy đồng mẫu số các phân số.",
+        theory: `### 1. Bội chung
+- Một số được gọi là **bội chung** của hai hay nhiều số nếu nó là bội của tất cả các số đó.
+- Tập hợp bội chung của $a$ và $b$ kí hiệu là $\\mathrm{BC}(a, b)$.
+
+### 2. Bội chung nhỏ nhất (BCNN)
+- **BCNN** của hai hay nhiều số là số nhỏ nhất khác $0$ trong tập hợp các bội chung của các số đó. Kí hiệu là $\\mathrm{BCNN}(a, b)$.
+- **Cách tìm BCNN bằng cách phân tích thừa số nguyên tố**:
+  - *Bước 1*: Phân tích mỗi số ra thừa số nguyên tố.
+  - *Bước 2*: Chọn ra các thừa số nguyên tố **chung và riêng**.
+  - *Bước 3*: Lập tích các thừa số đã chọn, mỗi thừa số lấy với **số mũ lớn nhất**. Tích đó là BCNN cần tìm.
+- *Trường hợp đặc biệt*: Nếu các số cần tìm BCNN là các số nguyên tố cùng nhau từng đôi một thì BCNN bằng tích của các số đó (ví dụ BCNN(3, 5, 8) = 120).
+
+### 3. Ứng dụng: Quy đồng mẫu số các phân số
+- Ta chọn mẫu số chung là BCNN của các mẫu số của các phân số cần quy đồng.`,
+        questions: [
+          {
+            question: "Tìm BCNN của hai số 8 và 12.",
+            options: [
+              "96",
+              "24",
+              "48",
               "12"
+            ],
+            correctIndex: 1,
+            explanation: "Phân tích: 8 = 2^3; 12 = 2^2 * 3. Chọn thừa số chung và riêng là 2 và 3. Số mũ lớn nhất là 2^3 và 3^1. Vậy BCNN(8, 12) = 2^3 * 3 = 8 * 3 = 24."
+          },
+          {
+            question: "Quy đồng hai phân số 5/6 và 3/8. Mẫu số chung nhỏ nhất của hai phân số này là bao nhiêu?",
+            options: [
+              "48",
+              "24",
+              "12",
+              "14"
+            ],
+            correctIndex: 1,
+            explanation: "Mẫu số chung nhỏ nhất là BCNN của 6 và 8. Phân tích: 6 = 2 * 3, 8 = 2^3. BCNN(6, 8) = 2^3 * 3 = 24."
+          }
+        ]
+      },
+      {
+        id: "m6-13",
+        title: "Bài 13: Tập hợp các số nguyên",
+        summary: "Làm quen số nguyên âm, tập hợp số nguyên Z, trục số và quy tắc so sánh các số nguyên.",
+        theory: `### 1. Số nguyên âm và sự cần thiết
+- Trong thực tế, để biểu diễn nhiệt độ dưới $0^{\\circ}\\mathrm{C}$, độ sâu dưới mực nước biển, hoặc số tiền nợ, ta dùng **số nguyên âm** (ví dụ $-3, -50, -100$).
+- Số nguyên âm được viết bằng cách thêm dấu trừ "$-$" trước số tự nhiên khác 0.
+
+### 2. Tập hợp số nguyên $\\mathbb{Z}$
+Tập hợp gồm các số nguyên âm, số 0 và các số nguyên dương được gọi là tập hợp các số nguyên, kí hiệu là $\\mathbb{Z}$:
+$$\\mathbb{Z} = \\{\\dots; -3; -2; -1; 0; 1; 2; 3; \\dots\\}$$
+
+### 3. Trục số nguyên
+- Số nguyên được biểu diễn trên một đường thẳng có hướng gọi là **trục số**.
+- Điểm $0$ được gọi là điểm gốc. Chiều từ trái sang phải là chiều dương (chiều mũi tên), chiều từ phải sang trái là chiều âm.
+- Hai số nguyên nằm ở hai phía của điểm 0 và cách đều điểm 0 gọi là **hai số đối** của nhau. Ví dụ: $-3$ và $3$ là hai số đối.
+
+### 4. So sánh hai số nguyên
+- Trên trục số nằm ngang, điểm biểu diễn số nhỏ hơn nằm ở bên trái điểm biểu diễn số lớn hơn.
+- Mọi số nguyên âm đều nhỏ hơn số 0 và nhỏ hơn mọi số nguyên dương.
+- Với hai số nguyên âm, số nào có số đối lớn hơn thì số đó nhỏ hơn (ví dụ: $-5 < -3$ vì số đối $5 > 3$).`,
+        questions: [
+          {
+            question: "Sắp xếp các số nguyên sau theo thứ tự tăng dần: -8; 5; 0; -3; 2.",
+            options: [
+              "-8; -3; 0; 2; 5",
+              "-3; -8; 0; 2; 5",
+              "5; 2; 0; -3; -8",
+              "-8; -3; 0; 5; 2"
+            ],
+            correctIndex: 0,
+            explanation: "Số nguyên âm càng xa điểm 0 càng nhỏ, do đó -8 < -3. Tiếp theo là số 0, sau đó là các số nguyên dương 2, 5. Vậy thứ tự tăng dần là: -8; -3; 0; 2; 5."
+          },
+          {
+            question: "Tìm số đối của số nguyên -15.",
+            options: [
+              "-15",
+              "15",
+              "0",
+              "1/15"
+            ],
+            correctIndex: 1,
+            explanation: "Hai số đối nhau nằm đối xứng nhau qua điểm gốc 0 trên trục số. Số đối của số âm -15 là số dương 15."
+          }
+        ]
+      },
+      {
+        id: "m6-14",
+        title: "Bài 14: Phép cộng, trừ số nguyên và Quy tắc dấu ngoặc",
+        summary: "Cộng hai số nguyên cùng dấu, khác dấu. Phép trừ số nguyên và cách bỏ ngoặc có dấu cộng hoặc trừ phía trước.",
+        theory: `### 1. Phép cộng hai số nguyên
+- **Cộng hai số nguyên cùng dấu**:
+  - *Cùng dương*: Thực hiện giống cộng hai số tự nhiên.
+  - *Cùng âm*: Cộng hai số đối của chúng rồi thêm dấu trừ "$-$" đằng trước kết quả. Ví dụ: $(-3) + (-5) = -(3 + 5) = -8$.
+- **Cộng hai số nguyên khác dấu**:
+  - Nếu hai số đối nhau thì tổng bằng 0: $a + (-a) = 0$.
+  - Nếu không đối nhau: Lấy số đối lớn hơn trừ số đối nhỏ hơn, rồi đặt trước kết quả dấu của số có số đối lớn hơn.
+  - *Ví dụ:* $(-8) + 5 = -(8 - 5) = -3$; $12 + (-4) = +(12 - 4) = 8$.
+
+### 2. Phép trừ hai số nguyên
+Muốn trừ số nguyên $a$ cho số nguyên $b$, ta cộng $a$ với số đối của $b$:
+$$a - b = a + (-b)$$
+- *Ví dụ:* $3 - 8 = 3 + (-8) = -5$; $5 - (-2) = 5 + 2 = 7$.
+
+### 3. Quy tắc dấu ngoặc
+Khi bỏ dấu ngoặc trong một biểu thức:
+- Nếu đằng trước dấu ngoặc có **dấu cộng "+""**, ta **giữ nguyên dấu** của tất cả các số hạng trong ngoặc.
+  $$a + (b - c + d) = a + b - c + d$$
+- Nếu đằng trước dấu ngoặc có **dấu trừ "-"**, ta phải **đổi dấu** của tất cả các số hạng trong ngoặc (dấu $+$ thành $-$, dấu $-$ thành $+$).
+  $$a - (b - c + d) = a - b + c - d$$`,
+        questions: [
+          {
+            question: "Tính kết quả phép tính: (-12) - (-15)",
+            options: [
+              "-27",
+              "3",
+              "-3",
+              "27"
+            ],
+            correctIndex: 1,
+            explanation: "Áp dụng quy tắc trừ số nguyên: (-12) - (-15) = (-12) + 15 = 15 - 12 = 3."
+          },
+          {
+            question: "Hãy rút gọn biểu thức: A = 794 - (136 - 206) bằng cách phá ngoặc.",
+            options: [
+              "794 - 136 - 206",
+              "794 - 136 + 206",
+              "794 + 136 - 206",
+              "794 + 136 + 206"
+            ],
+            correctIndex: 1,
+            explanation: "Vì đằng trước ngoặc có dấu trừ '-', khi bỏ ngoặc ta phải đổi dấu các số hạng bên trong: 136 (mang dấu + ngầm định) đổi thành -136, -206 đổi thành +206. Vậy A = 794 - 136 + 206."
+          }
+        ]
+      }
+    ],         "12"
             ],
             correctIndex: 2,
             explanation: "Tích của 4 thừa số 3 bằng nhau được viết gọn dưới dạng lũy thừa là 3^4."

@@ -37,6 +37,7 @@ import {
   BookOpenCheck,
   Award,
   Upload,
+  Download,
   FileJson,
   FileSpreadsheet,
   Lock,
@@ -54,6 +55,16 @@ import {
   Pencil,
   Save
 } from "lucide-react";
+import {
+  initAuthListener,
+  googleSignIn,
+  googleSignOut,
+  listGoogleSheets,
+  createGoogleSheet,
+  exportToGoogleSheet,
+  importFromGoogleSheet
+} from "./googleSheetsService";
+import { User as FirebaseUser } from "firebase/auth";
 
 const DEFAULT_JSON_DB = `[
   {
@@ -300,8 +311,153 @@ export default function App() {
   const [coreFeatures, setCoreFeatures] = useState("");
   const [tone, setTone] = useState("Thân thiện, khích lệ & Sáng tạo");
   const [explanationStyle, setExplanationStyle] = useState("Đặt câu hỏi gợi mở (Scaffolding)");
-  const [customDatabase, setCustomDatabase] = useState(DEFAULT_JSON_DB);
+  const [customDatabase, setCustomDatabase] = useState(() => {
+    return localStorage.getItem("antam_custom_database") || DEFAULT_JSON_DB;
+  });
   const [dbFormat, setDbFormat] = useState<"json" | "csv">("json");
+
+  // Save custom database to localStorage
+  useEffect(() => {
+    localStorage.setItem("antam_custom_database", customDatabase);
+  }, [customDatabase]);
+
+  // Google Sheets Sync State
+  const [gUser, setGUser] = useState<FirebaseUser | null>(null);
+  const [gToken, setGToken] = useState<string | null>(null);
+  const [gSheets, setGSheets] = useState<any[]>([]);
+  const [selectedSheetId, setSelectedSheetId] = useState<string>("");
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [syncSuccess, setSyncSuccess] = useState<string | null>(null);
+  const [newSheetTitle, setNewSheetTitle] = useState("");
+  const [showNewSheetInput, setShowNewSheetInput] = useState(false);
+
+  // Initialize Auth Listener on Mount
+  useEffect(() => {
+    const unsubscribe = initAuthListener(
+      (user, token) => {
+        setGUser(user);
+        setGToken(token);
+        // Automatically fetch sheets once authenticated
+        fetchSheetsList(token);
+      },
+      () => {
+        setGUser(null);
+        setGToken(null);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
+
+  const fetchSheetsList = async (token: string) => {
+    try {
+      const files = await listGoogleSheets(token);
+      setGSheets(files);
+      if (files.length > 0 && !selectedSheetId) {
+        setSelectedSheetId(files[0].id);
+      }
+    } catch (err: any) {
+      console.error("Error fetching sheets:", err);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsSyncing(true);
+    setSyncError(null);
+    try {
+      const result = await googleSignIn();
+      if (result) {
+        setGUser(result.user);
+        setGToken(result.accessToken);
+        await fetchSheetsList(result.accessToken);
+        setSyncSuccess("Đăng nhập Google thành công!");
+        setTimeout(() => setSyncSuccess(null), 3000);
+      }
+    } catch (err: any) {
+      setSyncError(err.message || "Đăng nhập Google thất bại.");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleGoogleSignOut = async () => {
+    await googleSignOut();
+    setGUser(null);
+    setGToken(null);
+    setGSheets([]);
+    setSelectedSheetId("");
+  };
+
+  const handleCreateNewSheet = async () => {
+    if (!gToken) return;
+    if (!newSheetTitle.trim()) {
+      alert("Vui lòng nhập tên bảng tính mới!");
+      return;
+    }
+    setIsSyncing(true);
+    setSyncError(null);
+    try {
+      const newSheet = await createGoogleSheet(gToken, newSheetTitle);
+      setSyncSuccess(`Đã tạo bảng tính mới: "${newSheetTitle}"`);
+      await fetchSheetsList(gToken);
+      setSelectedSheetId(newSheet.id);
+      setShowNewSheetInput(false);
+      setNewSheetTitle("");
+      setTimeout(() => setSyncSuccess(null), 3000);
+    } catch (err: any) {
+      setSyncError(err.message || "Tạo bảng tính mới thất bại.");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleExportData = async () => {
+    if (!gToken || !selectedSheetId) return;
+    const currentStudents = getStudentsList();
+    if (currentStudents.length === 0) {
+      alert("Danh sách học sinh đang trống. Không có dữ liệu để xuất!");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Bạn có chắc chắn muốn xuất ${currentStudents.length} học sinh sang Google Sheet? Thao tác này sẽ ghi đè dữ liệu trên Sheet1 của file đã chọn.`
+    );
+    if (!confirmed) return;
+
+    setIsSyncing(true);
+    setSyncError(null);
+    try {
+      await exportToGoogleSheet(gToken, selectedSheetId, currentStudents);
+      setSyncSuccess("Đã xuất dữ liệu học sinh lên Google Sheet thành công!");
+      setTimeout(() => setSyncSuccess(null), 4000);
+    } catch (err: any) {
+      setSyncError(err.message || "Xuất dữ liệu lên Google Sheet thất bại.");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleImportData = async () => {
+    if (!gToken || !selectedSheetId) return;
+
+    const confirmed = window.confirm(
+      "Bạn có chắc chắn muốn nhập dữ liệu từ Google Sheet? Dữ liệu học sinh hiện tại trên ứng dụng của bạn sẽ bị thay thế bằng dữ liệu trên Google Sheet."
+    );
+    if (!confirmed) return;
+
+    setIsSyncing(true);
+    setSyncError(null);
+    try {
+      const importedStudents = await importFromGoogleSheet(gToken, selectedSheetId);
+      saveStudentsList(importedStudents);
+      setSyncSuccess(`Đã nhập thành công ${importedStudents.length} học sinh từ Google Sheet!`);
+      setTimeout(() => setSyncSuccess(null), 4000);
+    } catch (err: any) {
+      setSyncError(err.message || "Nhập dữ liệu từ Google Sheet thất bại.");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // App System States
   const [loading, setLoading] = useState(false);
@@ -2498,6 +2654,194 @@ Please use this student profile to customize your teaching. Use the scaffolding 
                   Tài khoản Giáo viên ({teachersList.length})
                 </button>
               </div>
+
+              {/* Google Sheets Integration Panel */}
+              {accountTab === "student" && (
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 shadow-xs">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200/60 pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-emerald-50 rounded-xl text-emerald-600">
+                        <FileSpreadsheet className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-800 text-xs sm:text-sm">Kết nối đồng bộ Google Sheets</h4>
+                        <p className="text-[10px] text-slate-500">Đồng bộ trực tiếp hai chiều tài khoản học sinh & điểm số</p>
+                      </div>
+                    </div>
+
+                    {!gUser ? (
+                      <button
+                        type="button"
+                        onClick={handleGoogleSignIn}
+                        disabled={isSyncing}
+                        className="gsi-material-button text-xs font-bold shrink-0 shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+                      >
+                        <div className="gsi-material-button-state"></div>
+                        <div className="gsi-material-button-content-wrapper">
+                          <div className="gsi-material-button-icon">
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" style={{ display: 'block' }}>
+                              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                            </svg>
+                          </div>
+                          <span className="gsi-material-button-contents text-xs font-bold text-slate-700">Đăng nhập bằng Google</span>
+                        </div>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1.5">
+                          {gUser.photoURL ? (
+                            <img src={gUser.photoURL} alt="Avatar" className="w-6 h-6 rounded-full border border-slate-200" referrerPolicy="no-referrer" />
+                          ) : (
+                            <div className="w-6 h-6 bg-emerald-100 text-emerald-800 flex items-center justify-center rounded-full text-[10px] font-bold">
+                              {gUser.displayName?.charAt(0) || "G"}
+                            </div>
+                          )}
+                          <div className="text-left">
+                            <p className="text-[10px] font-bold text-slate-800 leading-tight">{gUser.displayName}</p>
+                            <p className="text-[9px] text-slate-400 leading-none">{gUser.email}</p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleGoogleSignOut}
+                          className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[10px] font-semibold transition-colors cursor-pointer"
+                        >
+                          Đăng xuất
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {gUser && (
+                    <div className="space-y-3">
+                      {/* Success / Error notification */}
+                      {syncSuccess && (
+                        <div className="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs flex items-center gap-1.5 font-medium">
+                          <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>{syncSuccess}</span>
+                        </div>
+                      )}
+                      {syncError && (
+                        <div className="p-2.5 bg-red-50 border border-red-200 text-red-800 rounded-xl text-xs flex items-center gap-1.5 font-medium">
+                          <Info className="w-4 h-4 text-red-600 shrink-0" />
+                          <span>{syncError}</span>
+                        </div>
+                      )}
+
+                      <div className="flex flex-col md:flex-row items-stretch md:items-end gap-3">
+                        {/* Selector or Create input */}
+                        <div className="flex-1 space-y-1 text-left">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Chọn file Google Sheet của bạn</label>
+                          {!showNewSheetInput ? (
+                            <div className="flex gap-2">
+                              <select
+                                value={selectedSheetId}
+                                onChange={(e) => setSelectedSheetId(e.target.value)}
+                                className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 font-medium"
+                              >
+                                {gSheets.length === 0 ? (
+                                  <option value="">-- Không tìm thấy bảng tính nào --</option>
+                                ) : (
+                                  gSheets.map((sheet) => (
+                                    <option key={sheet.id} value={sheet.id}>
+                                      {sheet.name}
+                                    </option>
+                                  ))
+                                )}
+                              </select>
+                              <button
+                                type="button"
+                                onClick={() => setShowNewSheetInput(true)}
+                                className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer"
+                              >
+                                + Tạo file mới
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                placeholder="Nhập tên bảng tính mới..."
+                                value={newSheetTitle}
+                                onChange={(e) => setNewSheetTitle(e.target.value)}
+                                className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleCreateNewSheet}
+                                disabled={isSyncing}
+                                className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer"
+                              >
+                                Tạo & Chọn
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setShowNewSheetInput(false)}
+                                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold shrink-0 transition-colors cursor-pointer"
+                              >
+                                Hủy
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Export / Import Actions */}
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            type="button"
+                            onClick={handleExportData}
+                            disabled={isSyncing || !selectedSheetId}
+                            className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
+                              isSyncing || !selectedSheetId
+                                ? "bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed"
+                                : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                            }`}
+                          >
+                            <Upload className="w-4 h-4" />
+                            Xuất sang Google Sheet
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleImportData}
+                            disabled={isSyncing || !selectedSheetId}
+                            className={`flex-1 sm:flex-initial px-4 py-2 border rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
+                              isSyncing || !selectedSheetId
+                                ? "bg-slate-150 border-slate-200 text-slate-400 cursor-not-allowed"
+                                : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
+                            }`}
+                          >
+                            <Download className="w-4 h-4" />
+                            Nhập từ Google Sheet
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Display View Sheet link if a sheet is selected */}
+                      {selectedSheetId && (
+                        <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                          <span>Đang chọn bảng tính: </span>
+                          {gSheets.find((s) => s.id === selectedSheetId) ? (
+                            <a
+                              href={gSheets.find((s) => s.id === selectedSheetId)?.webViewLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-emerald-600 hover:underline inline-flex items-center gap-0.5 font-bold animate-pulse"
+                            >
+                              {gSheets.find((s) => s.id === selectedSheetId)?.name}
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          ) : (
+                            <span className="font-mono">{selectedSheetId}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Action bar and Search */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
