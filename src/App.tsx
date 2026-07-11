@@ -1443,28 +1443,6 @@ Please use this student profile to customize your teaching. Use the scaffolding 
                   </div>
                 )}
 
-                {/* Mock Accounts Helper Box */}
-                <div className="mt-6 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-500 space-y-1">
-                  <p className="font-bold text-slate-700 flex items-center gap-1">
-                    <Info className="w-3.5 h-3.5 text-emerald-600" />
-                    Tài khoản kiểm thử nhanh:
-                  </p>
-                  {loginRoleTab === "student" && (
-                    <>
-                      <p>• Tài khoản: <code className="bg-slate-100 px-1 py-0.5 rounded text-emerald-700 font-bold">namnh6</code> / Mật khẩu: <code className="bg-slate-100 px-1 py-0.5 rounded text-emerald-700">Nam@2026</code> (Toán 8.5, KHTN 7.2)</p>
-                      <p>• Tài khoản: <code className="bg-slate-100 px-1 py-0.5 rounded text-emerald-700 font-bold">maitt7</code> / Mật khẩu: <code className="bg-slate-100 px-1 py-0.5 rounded text-emerald-700">MaiMai#123</code> (Văn 9.2, Anh 8.5)</p>
-                    </>
-                  )}
-                  {loginRoleTab === "teacher" && (
-                    <>
-                      <p>• Tài khoản: <code className="bg-slate-100 px-1 py-0.5 rounded text-emerald-700 font-bold">teacher1</code> / Mật khẩu: <code className="bg-slate-100 px-1 py-0.5 rounded text-emerald-700">teacher123</code></p>
-                      <p>• Tài khoản: <code className="bg-slate-100 px-1 py-0.5 rounded text-emerald-700 font-bold">nguyenvana</code> / Mật khẩu: <code className="bg-slate-100 px-1 py-0.5 rounded text-emerald-700">teacher123</code></p>
-                    </>
-                  )}
-                  {loginRoleTab === "admin" && (
-                    <p>• Tài khoản: <code className="bg-slate-100 px-1 py-0.5 rounded text-emerald-700 font-bold">admin</code> / Mật khẩu: <code className="bg-slate-100 px-1 py-0.5 rounded text-emerald-700">admin123</code></p>
-                  )}
-                </div>
               </form>
             ) : (
               // REGISTER FORM
