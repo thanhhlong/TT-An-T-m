@@ -25,7 +25,8 @@ export interface GradeData {
   };
 }
 
-export const CURRICULUM_DATA: { [grade: string]: { [subject: string]: Lesso  "Lớp 6": {
+export const CURRICULUM_DATA: { [grade: string]: { [subject: string]: Lesson[] } } = {
+  "Lớp 6": {
     "Toán": [
       {
         id: "m6-1",
@@ -643,24 +644,6 @@ Khi bỏ dấu ngoặc trong một biểu thức:
             ],
             correctIndex: 1,
             explanation: "Vì đằng trước ngoặc có dấu trừ '-', khi bỏ ngoặc ta phải đổi dấu các số hạng bên trong: 136 (mang dấu + ngầm định) đổi thành -136, -206 đổi thành +206. Vậy A = 794 - 136 + 206."
-          }
-        ]
-      }
-    ],         "12"
-            ],
-            correctIndex: 2,
-            explanation: "Tích của 4 thừa số 3 bằng nhau được viết gọn dưới dạng lũy thừa là 3^4."
-          },
-          {
-            question: "Kết quả của phép tính 2^3 * 2^4 là bao nhiêu?",
-            options: [
-              "2^12",
-              "2^7",
-              "4^7",
-              "128"
-            ],
-            correctIndex: 1,
-            explanation: "Áp dụng công thức nhân hai lũy thừa cùng cơ số: 2^3 * 2^4 = 2^(3+4) = 2^7. (2^7 = 128 cũng đúng về mặt giá trị, nhưng dạng lũy thừa chuẩn là 2^7)."
           }
         ]
       }
