@@ -64,8 +64,10 @@ import {
   googleSignOut,
   listGoogleSheets,
   createGoogleSheet,
-  exportToGoogleSheet,
-  importFromGoogleSheet
+  exportAccountsToGoogleSheet,
+  importAccountsFromGoogleSheet,
+  exportScoresToGoogleSheet,
+  importScoresFromGoogleSheet
 } from "./googleSheetsService";
 import { User as FirebaseUser } from "firebase/auth";
 
@@ -340,12 +342,13 @@ export default function App() {
   const [gUser, setGUser] = useState<FirebaseUser | null>(null);
   const [gToken, setGToken] = useState<string | null>(null);
   const [gSheets, setGSheets] = useState<any[]>([]);
-  const [selectedSheetId, setSelectedSheetId] = useState<string>("");
+  const [selectedAccountSheetId, setSelectedAccountSheetId] = useState<string>("");
+  const [selectedScoreSheetId, setSelectedScoreSheetId] = useState<string>("");
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [syncSuccess, setSyncSuccess] = useState<string | null>(null);
   const [newSheetTitle, setNewSheetTitle] = useState("");
-  const [showNewSheetInput, setShowNewSheetInput] = useState(false);
+  const [showNewSheetInput, setShowNewSheetInput] = useState<"account" | "score" | null>(null);
 
   // Initialize Auth Listener on Mount
   useEffect(() => {
@@ -368,8 +371,11 @@ export default function App() {
     try {
       const files = await listGoogleSheets(token);
       setGSheets(files);
-      if (files.length > 0 && !selectedSheetId) {
-        setSelectedSheetId(files[0].id);
+      if (files.length > 0 && !selectedAccountSheetId) {
+        setSelectedAccountSheetId(files[0].id);
+      }
+      if (files.length > 0 && !selectedScoreSheetId) {
+        setSelectedScoreSheetId(files[0].id);
       }
     } catch (err: any) {
       console.error("Error fetching sheets:", err);
@@ -400,10 +406,11 @@ export default function App() {
     setGUser(null);
     setGToken(null);
     setGSheets([]);
-    setSelectedSheetId("");
+    setSelectedAccountSheetId("");
+    setSelectedScoreSheetId("");
   };
 
-  const handleCreateNewSheet = async () => {
+  const handleCreateNewSheet = async (target: "account" | "score") => {
     if (!gToken) return;
     if (!newSheetTitle.trim()) {
       alert("Vui lòng nhập tên bảng tính mới!");
@@ -415,8 +422,12 @@ export default function App() {
       const newSheet = await createGoogleSheet(gToken, newSheetTitle);
       setSyncSuccess(`Đã tạo bảng tính mới: "${newSheetTitle}"`);
       await fetchSheetsList(gToken);
-      setSelectedSheetId(newSheet.id);
-      setShowNewSheetInput(false);
+      if (target === "account") {
+        setSelectedAccountSheetId(newSheet.id);
+      } else {
+        setSelectedScoreSheetId(newSheet.id);
+      }
+      setShowNewSheetInput(null);
       setNewSheetTitle("");
       setTimeout(() => setSyncSuccess(null), 3000);
     } catch (err: any) {
@@ -426,49 +437,122 @@ export default function App() {
     }
   };
 
-  const handleExportData = async () => {
-    if (!gToken || !selectedSheetId) return;
+  // --- Account file sync (Họ tên, Tài khoản, Mật khẩu, Khối) ---
+
+  const handleExportAccounts = async () => {
+    if (!gToken || !selectedAccountSheetId) return;
     const currentStudents = getStudentsList();
     if (currentStudents.length === 0) {
       alert("Danh sách học sinh đang trống. Không có dữ liệu để xuất!");
       return;
     }
-
     const confirmed = window.confirm(
-      `Bạn có chắc chắn muốn xuất ${currentStudents.length} học sinh sang Google Sheet? Thao tác này sẽ ghi đè dữ liệu trên Sheet1 của file đã chọn.`
+      `Bạn có chắc chắn muốn xuất ${currentStudents.length} tài khoản học sinh sang Google Sheet? Thao tác này sẽ ghi đè dữ liệu trên Sheet1 của file đã chọn.`
     );
     if (!confirmed) return;
 
     setIsSyncing(true);
     setSyncError(null);
     try {
-      await exportToGoogleSheet(gToken, selectedSheetId, currentStudents);
-      setSyncSuccess("Đã xuất dữ liệu học sinh lên Google Sheet thành công!");
+      await exportAccountsToGoogleSheet(gToken, selectedAccountSheetId, currentStudents);
+      setSyncSuccess("Đã xuất File Tài khoản lên Google Sheet thành công!");
       setTimeout(() => setSyncSuccess(null), 4000);
     } catch (err: any) {
-      setSyncError(err.message || "Xuất dữ liệu lên Google Sheet thất bại.");
+      setSyncError(err.message || "Xuất File Tài khoản lên Google Sheet thất bại.");
     } finally {
       setIsSyncing(false);
     }
   };
 
-  const handleImportData = async () => {
-    if (!gToken || !selectedSheetId) return;
-
+  const handleImportAccounts = async () => {
+    if (!gToken || !selectedAccountSheetId) return;
     const confirmed = window.confirm(
-      "Bạn có chắc chắn muốn nhập dữ liệu từ Google Sheet? Dữ liệu học sinh hiện tại trên ứng dụng của bạn sẽ bị thay thế bằng dữ liệu trên Google Sheet."
+      "Bạn có chắc chắn muốn nhập danh sách tài khoản từ Google Sheet? Danh sách tài khoản hiện tại sẽ được thay thế; điểm số của các tài khoản trùng khớp vẫn được giữ nguyên, tài khoản mới sẽ có điểm mặc định là 0."
     );
     if (!confirmed) return;
 
     setIsSyncing(true);
     setSyncError(null);
     try {
-      const importedStudents = await importFromGoogleSheet(gToken, selectedSheetId);
-      saveStudentsList(importedStudents);
-      setSyncSuccess(`Đã nhập thành công ${importedStudents.length} học sinh từ Google Sheet!`);
+      const importedAccounts = await importAccountsFromGoogleSheet(gToken, selectedAccountSheetId);
+      const existingByAccount = new Map(getStudentsList().map((s) => [s.taiKhoan, s]));
+      const merged = importedAccounts.map((acc) => {
+        const existing = existingByAccount.get(acc.taiKhoan);
+        return {
+          ...acc,
+          diemToan: existing?.diemToan ?? 0,
+          diemKHTN: existing?.diemKHTN ?? 0,
+          diemTiengAnh: existing?.diemTiengAnh ?? 0,
+          diemVan: existing?.diemVan ?? 0,
+        };
+      });
+      saveStudentsList(merged);
+      setSyncSuccess(`Đã nhập thành công ${merged.length} tài khoản từ Google Sheet!`);
       setTimeout(() => setSyncSuccess(null), 4000);
     } catch (err: any) {
-      setSyncError(err.message || "Nhập dữ liệu từ Google Sheet thất bại.");
+      setSyncError(err.message || "Nhập File Tài khoản từ Google Sheet thất bại.");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // --- Score file sync (Tài khoản, Họ tên, Điểm Toán/KHTN/Tiếng Anh/Văn) ---
+
+  const handleExportScores = async () => {
+    if (!gToken || !selectedScoreSheetId) return;
+    const currentStudents = getStudentsList();
+    if (currentStudents.length === 0) {
+      alert("Danh sách học sinh đang trống. Không có dữ liệu để xuất!");
+      return;
+    }
+    const confirmed = window.confirm(
+      `Bạn có chắc chắn muốn xuất điểm của ${currentStudents.length} học sinh sang Google Sheet? Thao tác này sẽ ghi đè dữ liệu trên Sheet1 của file đã chọn.`
+    );
+    if (!confirmed) return;
+
+    setIsSyncing(true);
+    setSyncError(null);
+    try {
+      await exportScoresToGoogleSheet(gToken, selectedScoreSheetId, currentStudents);
+      setSyncSuccess("Đã xuất File Điểm số lên Google Sheet thành công!");
+      setTimeout(() => setSyncSuccess(null), 4000);
+    } catch (err: any) {
+      setSyncError(err.message || "Xuất File Điểm số lên Google Sheet thất bại.");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleImportScores = async () => {
+    if (!gToken || !selectedScoreSheetId) return;
+    const confirmed = window.confirm(
+      "Bạn có chắc chắn muốn nhập điểm số từ Google Sheet? Điểm của các tài khoản trùng khớp sẽ bị ghi đè; các tài khoản không tồn tại trong hệ thống sẽ được bỏ qua."
+    );
+    if (!confirmed) return;
+
+    setIsSyncing(true);
+    setSyncError(null);
+    try {
+      const importedScores = await importScoresFromGoogleSheet(gToken, selectedScoreSheetId);
+      const scoreByAccount = new Map(importedScores.map((s) => [s.taiKhoan, s]));
+      let updatedCount = 0;
+      const merged = getStudentsList().map((s) => {
+        const scoreUpdate = scoreByAccount.get(s.taiKhoan);
+        if (!scoreUpdate) return s;
+        updatedCount++;
+        return {
+          ...s,
+          diemToan: scoreUpdate.diemToan,
+          diemKHTN: scoreUpdate.diemKHTN,
+          diemTiengAnh: scoreUpdate.diemTiengAnh,
+          diemVan: scoreUpdate.diemVan,
+        };
+      });
+      saveStudentsList(merged);
+      setSyncSuccess(`Đã cập nhật điểm cho ${updatedCount} học sinh từ Google Sheet!`);
+      setTimeout(() => setSyncSuccess(null), 4000);
+    } catch (err: any) {
+      setSyncError(err.message || "Nhập File Điểm số từ Google Sheet thất bại.");
     } finally {
       setIsSyncing(false);
     }
@@ -2735,7 +2819,7 @@ Please use this student profile to customize your teaching. Use the scaffolding 
                   </div>
 
                   {gUser && (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {/* Success / Error notification */}
                       {syncSuccess && (
                         <div className="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs flex items-center gap-1.5 font-medium">
@@ -2750,113 +2834,209 @@ Please use this student profile to customize your teaching. Use the scaffolding 
                         </div>
                       )}
 
-                      <div className="flex flex-col md:flex-row items-stretch md:items-end gap-3">
-                        {/* Selector or Create input */}
-                        <div className="flex-1 space-y-1 text-left">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Chọn file Google Sheet của bạn</label>
-                          {!showNewSheetInput ? (
-                            <div className="flex gap-2">
-                              <select
-                                value={selectedSheetId}
-                                onChange={(e) => setSelectedSheetId(e.target.value)}
-                                className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 font-medium"
-                              >
-                                {gSheets.length === 0 ? (
-                                  <option value="">-- Không tìm thấy bảng tính nào --</option>
-                                ) : (
-                                  gSheets.map((sheet) => (
-                                    <option key={sheet.id} value={sheet.id}>
-                                      {sheet.name}
-                                    </option>
-                                  ))
-                                )}
-                              </select>
-                              <button
-                                type="button"
-                                onClick={() => setShowNewSheetInput(true)}
-                                className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer"
-                              >
-                                + Tạo file mới
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                placeholder="Nhập tên bảng tính mới..."
-                                value={newSheetTitle}
-                                onChange={(e) => setNewSheetTitle(e.target.value)}
-                                className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                              />
-                              <button
-                                type="button"
-                                onClick={handleCreateNewSheet}
-                                disabled={isSyncing}
-                                className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer"
-                              >
-                                Tạo & Chọn
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setShowNewSheetInput(false)}
-                                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold shrink-0 transition-colors cursor-pointer"
-                              >
-                                Hủy
-                              </button>
-                            </div>
-                          )}
-                        </div>
+                      {/* --- File Tài khoản --- */}
+                      <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                          File Tài khoản (Họ tên, Tài khoản, Mật khẩu, Khối)
+                        </p>
+                        <div className="flex flex-col md:flex-row items-stretch md:items-end gap-3">
+                          <div className="flex-1 space-y-1 text-left">
+                            {showNewSheetInput !== "account" ? (
+                              <div className="flex gap-2">
+                                <select
+                                  value={selectedAccountSheetId}
+                                  onChange={(e) => setSelectedAccountSheetId(e.target.value)}
+                                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 font-medium"
+                                >
+                                  {gSheets.length === 0 ? (
+                                    <option value="">-- Không tìm thấy bảng tính nào --</option>
+                                  ) : (
+                                    gSheets.map((sheet) => (
+                                      <option key={sheet.id} value={sheet.id}>
+                                        {sheet.name}
+                                      </option>
+                                    ))
+                                  )}
+                                </select>
+                                <button
+                                  type="button"
+                                  onClick={() => { setShowNewSheetInput("account"); setNewSheetTitle(""); }}
+                                  className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer"
+                                >
+                                  + Tạo file mới
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="Nhập tên bảng tính mới..."
+                                  value={newSheetTitle}
+                                  onChange={(e) => setNewSheetTitle(e.target.value)}
+                                  className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleCreateNewSheet("account")}
+                                  disabled={isSyncing}
+                                  className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer"
+                                >
+                                  Tạo & Chọn
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowNewSheetInput(null)}
+                                  className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold shrink-0 transition-colors cursor-pointer"
+                                >
+                                  Hủy
+                                </button>
+                              </div>
+                            )}
+                          </div>
 
-                        {/* Export / Import Actions */}
-                        <div className="flex gap-2 shrink-0">
-                          <button
-                            type="button"
-                            onClick={handleExportData}
-                            disabled={isSyncing || !selectedSheetId}
-                            className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
-                              isSyncing || !selectedSheetId
-                                ? "bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed"
-                                : "bg-emerald-600 hover:bg-emerald-700 text-white"
-                            }`}
-                          >
-                            <Upload className="w-4 h-4" />
-                            Xuất sang Google Sheet
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleImportData}
-                            disabled={isSyncing || !selectedSheetId}
-                            className={`flex-1 sm:flex-initial px-4 py-2 border rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
-                              isSyncing || !selectedSheetId
-                                ? "bg-slate-150 border-slate-200 text-slate-400 cursor-not-allowed"
-                                : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
-                            }`}
-                          >
-                            <Download className="w-4 h-4" />
-                            Nhập từ Google Sheet
-                          </button>
+                          <div className="flex gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={handleExportAccounts}
+                              disabled={isSyncing || !selectedAccountSheetId}
+                              className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
+                                isSyncing || !selectedAccountSheetId
+                                  ? "bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed"
+                                  : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                              }`}
+                            >
+                              <Upload className="w-4 h-4" />
+                              Xuất
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleImportAccounts}
+                              disabled={isSyncing || !selectedAccountSheetId}
+                              className={`flex-1 sm:flex-initial px-4 py-2 border rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
+                                isSyncing || !selectedAccountSheetId
+                                  ? "bg-slate-150 border-slate-200 text-slate-400 cursor-not-allowed"
+                                  : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
+                              }`}
+                            >
+                              <Download className="w-4 h-4" />
+                              Nhập
+                            </button>
+                          </div>
                         </div>
+                        {selectedAccountSheetId && gSheets.find((s) => s.id === selectedAccountSheetId) && (
+                          <a
+                            href={gSheets.find((s) => s.id === selectedAccountSheetId)?.webViewLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-emerald-600 hover:underline inline-flex items-center gap-0.5 font-bold"
+                          >
+                            {gSheets.find((s) => s.id === selectedAccountSheetId)?.name}
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
                       </div>
 
-                      {/* Display View Sheet link if a sheet is selected */}
-                      {selectedSheetId && (
-                        <div className="text-[10px] text-slate-400 flex items-center gap-1">
-                          <span>Đang chọn bảng tính: </span>
-                          {gSheets.find((s) => s.id === selectedSheetId) ? (
-                            <a
-                              href={gSheets.find((s) => s.id === selectedSheetId)?.webViewLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-emerald-600 hover:underline inline-flex items-center gap-0.5 font-bold animate-pulse"
+                      {/* --- File Điểm số --- */}
+                      <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                          File Điểm số (Tài khoản, Họ tên, Điểm Toán/KHTN/Tiếng Anh/Văn)
+                        </p>
+                        <div className="flex flex-col md:flex-row items-stretch md:items-end gap-3">
+                          <div className="flex-1 space-y-1 text-left">
+                            {showNewSheetInput !== "score" ? (
+                              <div className="flex gap-2">
+                                <select
+                                  value={selectedScoreSheetId}
+                                  onChange={(e) => setSelectedScoreSheetId(e.target.value)}
+                                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 font-medium"
+                                >
+                                  {gSheets.length === 0 ? (
+                                    <option value="">-- Không tìm thấy bảng tính nào --</option>
+                                  ) : (
+                                    gSheets.map((sheet) => (
+                                      <option key={sheet.id} value={sheet.id}>
+                                        {sheet.name}
+                                      </option>
+                                    ))
+                                  )}
+                                </select>
+                                <button
+                                  type="button"
+                                  onClick={() => { setShowNewSheetInput("score"); setNewSheetTitle(""); }}
+                                  className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer"
+                                >
+                                  + Tạo file mới
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="Nhập tên bảng tính mới..."
+                                  value={newSheetTitle}
+                                  onChange={(e) => setNewSheetTitle(e.target.value)}
+                                  className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleCreateNewSheet("score")}
+                                  disabled={isSyncing}
+                                  className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer"
+                                >
+                                  Tạo & Chọn
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowNewSheetInput(null)}
+                                  className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold shrink-0 transition-colors cursor-pointer"
+                                >
+                                  Hủy
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={handleExportScores}
+                              disabled={isSyncing || !selectedScoreSheetId}
+                              className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
+                                isSyncing || !selectedScoreSheetId
+                                  ? "bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed"
+                                  : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                              }`}
                             >
-                              {gSheets.find((s) => s.id === selectedSheetId)?.name}
-                              <ExternalLink className="w-3 h-3" />
-                            </a>
-                          ) : (
-                            <span className="font-mono">{selectedSheetId}</span>
-                          )}
+                              <Upload className="w-4 h-4" />
+                              Xuất
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleImportScores}
+                              disabled={isSyncing || !selectedScoreSheetId}
+                              className={`flex-1 sm:flex-initial px-4 py-2 border rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
+                                isSyncing || !selectedScoreSheetId
+                                  ? "bg-slate-150 border-slate-200 text-slate-400 cursor-not-allowed"
+                                  : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
+                              }`}
+                            >
+                              <Download className="w-4 h-4" />
+                              Nhập
+                            </button>
+                          </div>
                         </div>
-                      )}
+                        {selectedScoreSheetId && gSheets.find((s) => s.id === selectedScoreSheetId) && (
+                          <a
+                            href={gSheets.find((s) => s.id === selectedScoreSheetId)?.webViewLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-emerald-600 hover:underline inline-flex items-center gap-0.5 font-bold"
+                          >
+                            {gSheets.find((s) => s.id === selectedScoreSheetId)?.name}
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

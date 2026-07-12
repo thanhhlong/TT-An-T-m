@@ -114,104 +114,112 @@ export const createGoogleSheet = async (accessToken: string, title: string): Pro
   }
 };
 
-// Export student data to a Google Spreadsheet
-export const exportToGoogleSheet = async (
+const writeSheetValues = async (accessToken: string, spreadsheetId: string, values: any[][]) => {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Sheet1!A1?valueInputOption=RAW`;
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ values }),
+  });
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.error?.message || "Lỗi khi ghi dữ liệu lên Google Sheet");
+  }
+};
+
+const readSheetValues = async (accessToken: string, spreadsheetId: string, range: string): Promise<any[][]> => {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.error?.message || "Lỗi khi đọc dữ liệu từ Google Sheet");
+  }
+  const data = await res.json();
+  const rows = data.values;
+  if (!rows || rows.length <= 1) {
+    throw new Error("Google Sheet này không có dữ liệu hoặc chỉ có dòng tiêu đề.");
+  }
+  return rows.slice(1);
+};
+
+// --- Account file: Họ tên, Tài khoản, Mật khẩu, Khối ---
+
+export const exportAccountsToGoogleSheet = async (
   accessToken: string,
   spreadsheetId: string,
   students: any[]
 ): Promise<void> => {
-  // We will write to 'Sheet1!A1'
-  const range = "Sheet1!A1";
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?valueInputOption=RAW`;
-
-  // Prepare values grid
-  const headers = [
-    "Họ tên học sinh",
-    "Tài khoản",
-    "Mật khẩu",
-    "Điểm Toán",
-    "Điểm KHTN",
-    "Điểm Tiếng Anh",
-    "Điểm Văn",
-    "Khối học",
-  ];
-
-  const rows = students.map((s) => [
-    s.hoTen || "",
-    s.taiKhoan || "",
-    s.matKhau || "",
-    s.diemToan ?? 0,
-    s.diemKHTN ?? 0,
-    s.diemTiengAnh ?? 0,
-    s.diemVan ?? 0,
-    s.khoi || "Lớp 8",
-  ]);
-
-  const body = {
-    values: [headers, ...rows],
-  };
-
+  const headers = ["Họ tên học sinh", "Tài khoản", "Mật khẩu", "Khối"];
+  const rows = students.map((s) => [s.hoTen || "", s.taiKhoan || "", s.matKhau || "", s.khoi || "Lớp 8"]);
   try {
-    const res = await fetch(url, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.error?.message || "Lỗi khi xuất dữ liệu sang Google Sheet");
-    }
+    await writeSheetValues(accessToken, spreadsheetId, [headers, ...rows]);
   } catch (error) {
-    console.error("exportToGoogleSheet Error:", error);
+    console.error("exportAccountsToGoogleSheet Error:", error);
     throw error;
   }
 };
 
-// Import student data from a Google Spreadsheet
-export const importFromGoogleSheet = async (accessToken: string, spreadsheetId: string): Promise<any[]> => {
-  const range = "Sheet1!A1:H100"; // Read first 100 rows
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`;
-
+export const importAccountsFromGoogleSheet = async (accessToken: string, spreadsheetId: string): Promise<any[]> => {
   try {
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.error?.message || "Lỗi khi nhập dữ liệu từ Google Sheet");
-    }
-
-    const data = await res.json();
-    const rows = data.values;
-    if (!rows || rows.length <= 1) {
-      throw new Error("Google Sheet này không có dữ liệu hoặc chỉ có dòng tiêu đề.");
-    }
-
-    // Header validation and mapping
-    const headers = rows[0].map((h: string) => h.trim().toLowerCase());
-    
-    // Map data rows
-    return rows.slice(1).map((row: any[]) => {
-      return {
-        hoTen: row[0] || "Học sinh",
-        taiKhoan: row[1] || `hs_${Math.random().toString(36).substring(2, 7)}`,
-        matKhau: row[2] || "123456",
-        diemToan: parseFloat(row[3] || "0") || 0,
-        diemKHTN: parseFloat(row[4] || "0") || 0,
-        diemTiengAnh: parseFloat(row[5] || "0") || 0,
-        diemVan: parseFloat(row[6] || "0") || 0,
-        khoi: row[7] || "Lớp 8",
-      };
-    });
+    const rows = await readSheetValues(accessToken, spreadsheetId, "Sheet1!A1:D500");
+    return rows.map((row) => ({
+      hoTen: row[0] || "Học sinh",
+      taiKhoan: row[1] || `hs_${Math.random().toString(36).substring(2, 7)}`,
+      matKhau: row[2] || "123456",
+      khoi: row[3] || "Lớp 8",
+    }));
   } catch (error) {
-    console.error("importFromGoogleSheet Error:", error);
+    console.error("importAccountsFromGoogleSheet Error:", error);
+    throw error;
+  }
+};
+
+// --- Score file: Tài khoản, Họ tên, Điểm Toán, Điểm KHTN, Điểm Tiếng Anh, Điểm Văn ---
+
+export const exportScoresToGoogleSheet = async (
+  accessToken: string,
+  spreadsheetId: string,
+  students: any[]
+): Promise<void> => {
+  const headers = ["Tài khoản", "Họ tên học sinh", "Điểm Toán", "Điểm KHTN", "Điểm Tiếng Anh", "Điểm Văn"];
+  const rows = students.map((s) => [
+    s.taiKhoan || "",
+    s.hoTen || "",
+    s.diemToan ?? 0,
+    s.diemKHTN ?? 0,
+    s.diemTiengAnh ?? 0,
+    s.diemVan ?? 0,
+  ]);
+  try {
+    await writeSheetValues(accessToken, spreadsheetId, [headers, ...rows]);
+  } catch (error) {
+    console.error("exportScoresToGoogleSheet Error:", error);
+    throw error;
+  }
+};
+
+export const importScoresFromGoogleSheet = async (
+  accessToken: string,
+  spreadsheetId: string
+): Promise<{ taiKhoan: string; diemToan: number; diemKHTN: number; diemTiengAnh: number; diemVan: number }[]> => {
+  try {
+    const rows = await readSheetValues(accessToken, spreadsheetId, "Sheet1!A1:F500");
+    return rows
+      .map((row) => ({
+        taiKhoan: row[0] || "",
+        diemToan: parseFloat(row[2] || "0") || 0,
+        diemKHTN: parseFloat(row[3] || "0") || 0,
+        diemTiengAnh: parseFloat(row[4] || "0") || 0,
+        diemVan: parseFloat(row[5] || "0") || 0,
+      }))
+      .filter((r) => r.taiKhoan);
+  } catch (error) {
+    console.error("importScoresFromGoogleSheet Error:", error);
     throw error;
   }
 };
