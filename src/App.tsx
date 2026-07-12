@@ -53,7 +53,10 @@ import {
   Plus,
   PlusCircle,
   Pencil,
-  Save
+  Save,
+  Eye,
+  EyeOff,
+  Clock
 } from "lucide-react";
 import {
   initAuthListener,
@@ -65,6 +68,16 @@ import {
   importFromGoogleSheet
 } from "./googleSheetsService";
 import { User as FirebaseUser } from "firebase/auth";
+
+// An exam is visible to students when explicitly shown, or when its scheduled
+// show time has been reached. Missing fields default to visible for
+// backward compatibility with lessons/quizzes created before this feature.
+function isExamVisible(lesson: any): boolean {
+  if (lesson.examVisibleAt) {
+    return new Date(lesson.examVisibleAt).getTime() <= Date.now();
+  }
+  return lesson.examVisible !== false;
+}
 
 const DEFAULT_JSON_DB = `[
   {
@@ -232,6 +245,8 @@ export default function App() {
   const [adminQuizSelectedGrade, setAdminQuizSelectedGrade] = useState<string>("Lớp 6");
   const [adminExpandedLessonId, setAdminExpandedLessonId] = useState<string | null>(null);
   const [adminExpandedQuizId, setAdminExpandedQuizId] = useState<string | null>(null);
+  const [schedulingQuizId, setSchedulingQuizId] = useState<string | null>(null);
+  const [scheduleDateTimeValue, setScheduleDateTimeValue] = useState("");
 
   // Create Lesson & Quiz Admin Forms State
   const [showCreateLessonForm, setShowCreateLessonForm] = useState(false);
@@ -705,6 +720,32 @@ export default function App() {
       updateCurriculumData(updatedCurriculum);
       setEditingQuizId(null);
     }
+  };
+
+  // Show/Hide an exam immediately (clears any pending schedule)
+  const handleSetExamVisible = (grade: string, subject: string, lessonId: string, visible: boolean) => {
+    const updatedCurriculum = { ...curriculumData };
+    if (updatedCurriculum[grade]?.[subject]) {
+      updatedCurriculum[grade][subject] = updatedCurriculum[grade][subject].map((lesson: any) => {
+        if (lesson.id !== lessonId) return lesson;
+        const { examVisibleAt, ...rest } = lesson;
+        return { ...rest, examVisible: visible };
+      });
+      updateCurriculumData(updatedCurriculum);
+    }
+  };
+
+  // Schedule a future time at which the exam automatically becomes visible
+  const handleScheduleExamVisible = (grade: string, subject: string, lessonId: string, isoDateTime: string) => {
+    const updatedCurriculum = { ...curriculumData };
+    if (updatedCurriculum[grade]?.[subject]) {
+      updatedCurriculum[grade][subject] = updatedCurriculum[grade][subject].map((lesson: any) =>
+        lesson.id === lessonId ? { ...lesson, examVisible: false, examVisibleAt: isoDateTime } : lesson
+      );
+      updateCurriculumData(updatedCurriculum);
+    }
+    setSchedulingQuizId(null);
+    setScheduleDateTimeValue("");
   };
 
   // Save students to customDatabase
@@ -1930,13 +1971,13 @@ Please use this student profile to customize your teaching. Use the scaffolding 
 
                       {/* Quizzes list */}
                       <div className="space-y-3">
-                        {activeLessons.length === 0 ? (
+                        {activeLessons.filter(isExamVisible).length === 0 ? (
                           <div className="text-center py-12 text-slate-400 border border-dashed border-slate-200 rounded-xl">
                             <Award className="w-8 h-8 mx-auto mb-2 opacity-30" />
                             <p className="text-xs">Chưa có bài trắc nghiệm môn {studentSelectedSubject} cho lớp của em.</p>
                           </div>
                         ) : (
-                          activeLessons.map((lesson) => (
+                          activeLessons.filter(isExamVisible).map((lesson) => (
                             <div key={lesson.id} className="p-4 border border-slate-200 rounded-xl hover:border-slate-300 transition-colors flex items-center justify-between gap-4">
                               <div className="space-y-1">
                                 <h4 className="font-bold text-slate-800 text-xs sm:text-sm">{lesson.title}</h4>
@@ -4205,8 +4246,54 @@ Please use this student profile to customize your teaching. Use the scaffolding 
                                 <p className="text-[10px] text-slate-500">
                                   Tổng số câu hỏi: {lesson.questions.length} câu • Điểm số tối đa: 10 điểm
                                 </p>
+                                <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded border ${
+                                  isExamVisible(lesson)
+                                    ? "text-emerald-700 bg-emerald-50 border-emerald-100"
+                                    : "text-slate-500 bg-slate-50 border-slate-200"
+                                }`}>
+                                  {isExamVisible(lesson) ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                                  {isExamVisible(lesson)
+                                    ? "Đang hiển thị cho học sinh"
+                                    : lesson.examVisibleAt
+                                      ? `Hẹn hiện lúc ${new Date(lesson.examVisibleAt).toLocaleString("vi-VN")}`
+                                      : "Đang ẩn với học sinh"}
+                                </span>
                               </div>
-                              <div className="flex items-center gap-2 shrink-0">
+                              <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSetExamVisible(adminQuizSelectedGrade, adminQuizSelectedSubject, lesson.id, false);
+                                  }}
+                                  className="p-1.5 text-slate-600 hover:text-red-700 bg-slate-50 hover:bg-red-50 border border-slate-200 hover:border-red-200 rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1"
+                                >
+                                  <EyeOff className="w-3 h-3" />
+                                  Ẩn đề
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSetExamVisible(adminQuizSelectedGrade, adminQuizSelectedSubject, lesson.id, true);
+                                  }}
+                                  className="p-1.5 text-slate-600 hover:text-emerald-700 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1"
+                                >
+                                  <Eye className="w-3 h-3" />
+                                  Hiện đề
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSchedulingQuizId(schedulingQuizId === lesson.id ? null : lesson.id);
+                                    setScheduleDateTimeValue("");
+                                  }}
+                                  className="p-1.5 text-slate-600 hover:text-blue-700 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1"
+                                >
+                                  <Clock className="w-3 h-3" />
+                                  Đặt thời gian hiện đề
+                                </button>
                                 <button
                                   type="button"
                                   onClick={(e) => {
@@ -4233,6 +4320,54 @@ Please use this student profile to customize your teaching. Use the scaffolding 
                                 </span>
                               </div>
                             </div>
+
+                            {/* Inline exam-visibility scheduler */}
+                            {schedulingQuizId === lesson.id && (
+                              <div
+                                onClick={(e) => e.stopPropagation()}
+                                className="mx-4 mb-4 p-3 bg-blue-50/40 border border-blue-200 rounded-xl flex flex-col sm:flex-row sm:items-end gap-2.5"
+                              >
+                                <div className="flex-1 space-y-1">
+                                  <label className="text-[10px] font-bold text-blue-800 uppercase tracking-wider">
+                                    Thời điểm tự động hiện đề
+                                  </label>
+                                  <input
+                                    type="datetime-local"
+                                    value={scheduleDateTimeValue}
+                                    onChange={(e) => setScheduleDateTimeValue(e.target.value)}
+                                    className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (!scheduleDateTimeValue) {
+                                      alert("Vui lòng chọn thời gian hiện đề!");
+                                      return;
+                                    }
+                                    handleScheduleExamVisible(
+                                      adminQuizSelectedGrade,
+                                      adminQuizSelectedSubject,
+                                      lesson.id,
+                                      new Date(scheduleDateTimeValue).toISOString()
+                                    );
+                                  }}
+                                  className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg cursor-pointer shrink-0"
+                                >
+                                  Xác nhận đặt lịch
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSchedulingQuizId(null);
+                                    setScheduleDateTimeValue("");
+                                  }}
+                                  className="px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-bold rounded-lg cursor-pointer shrink-0"
+                                >
+                                  Hủy
+                                </button>
+                              </div>
+                            )}
 
                             {/* Collapsible Content */}
                             {isExpanded && (

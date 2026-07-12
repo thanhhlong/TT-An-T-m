@@ -11,6 +11,10 @@ export interface Lesson {
   summary: string;
   theory: string;
   questions: QuizQuestion[];
+  // Exam visibility controls (managed by admin). Undefined examVisible defaults to visible
+  // for backward compatibility with existing lesson/quiz data.
+  examVisible?: boolean;
+  examVisibleAt?: string; // ISO datetime string; exam auto-shows once this time is reached
 }
 
 export interface SubjectData {
@@ -76,6 +80,204 @@ Có hai cách thường dùng để mô tả một tập hợp:
             ],
             correctIndex: 3,
             explanation: "Tập hợp A gồm ba phần tử x, y, z. Phát biểu 'A = {z; x; w}' là sai vì phần tử 'w' không nằm trong tập hợp A ban đầu."
+          },
+          {
+            "question": "Cho tập hợp A = {x ∈ N | 2 ≤ x < 10}. Viết tập hợp A dưới dạng liệt kê.",
+            "options": [
+              "{2; 3; 4; 5; 6; 7; 8; 9; 10}",
+              "{2; 3; 4; 5; 6; 7; 8}",
+              "{3; 4; 5; 6; 7; 8; 9}",
+              "{2; 3; 4; 5; 6; 7; 8; 9}"
+            ],
+            "correctIndex": 3,
+            "explanation": "Điều kiện 2 ≤ x < 10 nghĩa là x nhận các giá trị từ 2 đến 9. Vậy A = {2; 3; 4; 5; 6; 7; 8; 9}."
+          },
+          {
+            "question": "Cho tập hợp B = {x ∈ N | 4 < x ≤ 11}. Viết tập hợp B dưới dạng liệt kê.",
+            "options": [
+              "{6; 7; 8; 9; 10; 11; 12}",
+              "{5; 6; 7; 8; 9; 10; 11}",
+              "{5; 6; 7; 8; 9; 10}",
+              "{4; 5; 6; 7; 8; 9; 10; 11}"
+            ],
+            "correctIndex": 1,
+            "explanation": "Điều kiện 4 < x ≤ 11 nghĩa là x không nhận giá trị 4 nhưng nhận giá trị 11, tức x chạy từ 5 đến 11. Vậy B = {5; 6; 7; 8; 9; 10; 11}."
+          },
+          {
+            "question": "Cho tập hợp A = {x ∈ N | 0 ≤ x < 7}. Viết tập hợp A dưới dạng liệt kê.",
+            "options": [
+              "{0; 1; 2; 3; 4; 5; 6}",
+              "{0; 1; 2; 3; 4; 5; 6; 7}",
+              "{1; 2; 3; 4; 5; 6}",
+              "{0; 1; 2; 3; 4; 5}"
+            ],
+            "correctIndex": 0,
+            "explanation": "Điều kiện 0 ≤ x < 7 nghĩa là x nhận các giá trị từ 0 đến 6. Vậy A = {0; 1; 2; 3; 4; 5; 6}."
+          },
+          {
+            "question": "Cho tập hợp B = {x ∈ N | 6 < x ≤ 13}. Viết tập hợp B dưới dạng liệt kê.",
+            "options": [
+              "{7; 8; 9; 10; 11; 12; 13}",
+              "{6; 7; 8; 9; 10; 11; 12; 13}",
+              "{8; 9; 10; 11; 12; 13; 14}",
+              "{7; 8; 9; 10; 11; 12}"
+            ],
+            "correctIndex": 0,
+            "explanation": "Điều kiện 6 < x ≤ 13 nghĩa là x không nhận giá trị 6 nhưng nhận giá trị 13, tức x chạy từ 7 đến 13. Vậy B = {7; 8; 9; 10; 11; 12; 13}."
+          },
+          {
+            "question": "Cho tập hợp A = {x ∈ N | 3 ≤ x < 12}. Viết tập hợp A dưới dạng liệt kê.",
+            "options": [
+              "{3; 4; 5; 6; 7; 8; 9; 10; 11}",
+              "{3; 4; 5; 6; 7; 8; 9; 10; 11; 12}",
+              "{3; 4; 5; 6; 7; 8; 9; 10}",
+              "{4; 5; 6; 7; 8; 9; 10; 11}"
+            ],
+            "correctIndex": 0,
+            "explanation": "Điều kiện 3 ≤ x < 12 nghĩa là x nhận các giá trị từ 3 đến 11. Vậy A = {3; 4; 5; 6; 7; 8; 9; 10; 11}."
+          },
+          {
+            "question": "Cho tập hợp B = {x ∈ N | 1 < x ≤ 9}. Viết tập hợp B dưới dạng liệt kê.",
+            "options": [
+              "{2; 3; 4; 5; 6; 7; 8}",
+              "{2; 3; 4; 5; 6; 7; 8; 9}",
+              "{3; 4; 5; 6; 7; 8; 9; 10}",
+              "{1; 2; 3; 4; 5; 6; 7; 8; 9}"
+            ],
+            "correctIndex": 1,
+            "explanation": "Điều kiện 1 < x ≤ 9 nghĩa là x không nhận giá trị 1 nhưng nhận giá trị 9, tức x chạy từ 2 đến 9. Vậy B = {2; 3; 4; 5; 6; 7; 8; 9}."
+          },
+          {
+            "question": "Tập hợp C = {x ∈ N | 5 ≤ x ≤ 20} có bao nhiêu phần tử?",
+            "options": [
+              "15",
+              "14",
+              "16",
+              "17"
+            ],
+            "correctIndex": 2,
+            "explanation": "Số phần tử của tập hợp các số tự nhiên liên tiếp từ 5 đến 20 là (20 - 5) + 1 = 16 phần tử."
+          },
+          {
+            "question": "Tập hợp C = {x ∈ N | 10 ≤ x ≤ 30} có bao nhiêu phần tử?",
+            "options": [
+              "21",
+              "22",
+              "20",
+              "19"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số phần tử của tập hợp các số tự nhiên liên tiếp từ 10 đến 30 là (30 - 10) + 1 = 21 phần tử."
+          },
+          {
+            "question": "Tập hợp C = {x ∈ N | 1 ≤ x ≤ 15} có bao nhiêu phần tử?",
+            "options": [
+              "13",
+              "15",
+              "16",
+              "14"
+            ],
+            "correctIndex": 1,
+            "explanation": "Số phần tử của tập hợp các số tự nhiên liên tiếp từ 1 đến 15 là (15 - 1) + 1 = 15 phần tử."
+          },
+          {
+            "question": "Tập hợp C = {x ∈ N | 8 ≤ x ≤ 25} có bao nhiêu phần tử?",
+            "options": [
+              "18",
+              "19",
+              "17",
+              "16"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số phần tử của tập hợp các số tự nhiên liên tiếp từ 8 đến 25 là (25 - 8) + 1 = 18 phần tử."
+          },
+          {
+            "question": "Cho tập hợp A = {2; 4; 6; 8}. Số nào sau đây KHÔNG thuộc tập hợp A?",
+            "options": [
+              "10 (vì 10 không có trong danh sách phần tử)",
+              "6 (sai, vì 6 có trong tập hợp A)",
+              "2 (sai, vì 2 có trong tập hợp A)",
+              "4 (sai, vì 4 có trong tập hợp A)"
+            ],
+            "correctIndex": 0,
+            "explanation": "Tập hợp A chỉ gồm các phần tử {2; 4; 6; 8}. Số 10 không nằm trong danh sách này nên 10 ∉ A."
+          },
+          {
+            "question": "Cho tập hợp B = {1; 3; 5; 7; 9}. Số nào sau đây KHÔNG thuộc tập hợp B?",
+            "options": [
+              "2 (vì 2 không có trong danh sách phần tử)",
+              "1 (sai, vì 1 có trong tập hợp B)",
+              "5 (sai, vì 5 có trong tập hợp B)",
+              "3 (sai, vì 3 có trong tập hợp B)"
+            ],
+            "correctIndex": 0,
+            "explanation": "Tập hợp B chỉ gồm các phần tử {1; 3; 5; 7; 9}. Số 2 không nằm trong danh sách này nên 2 ∉ B."
+          },
+          {
+            "question": "Cho tập hợp M = {0; 5; 10; 15}. Số nào sau đây KHÔNG thuộc tập hợp M?",
+            "options": [
+              "10 (sai, vì 10 có trong tập hợp M)",
+              "1 (vì 1 không có trong danh sách phần tử)",
+              "5 (sai, vì 5 có trong tập hợp M)",
+              "0 (sai, vì 0 có trong tập hợp M)"
+            ],
+            "correctIndex": 1,
+            "explanation": "Tập hợp M chỉ gồm các phần tử {0; 5; 10; 15}. Số 1 không nằm trong danh sách này nên 1 ∉ M."
+          },
+          {
+            "question": "Cho tập hợp K = {11; 13; 17; 19}. Số nào sau đây KHÔNG thuộc tập hợp K?",
+            "options": [
+              "12 (vì 12 không có trong danh sách phần tử)",
+              "13 (sai, vì 13 có trong tập hợp K)",
+              "17 (sai, vì 17 có trong tập hợp K)",
+              "11 (sai, vì 11 có trong tập hợp K)"
+            ],
+            "correctIndex": 0,
+            "explanation": "Tập hợp K chỉ gồm các phần tử {11; 13; 17; 19}. Số 12 không nằm trong danh sách này nên 12 ∉ K."
+          },
+          {
+            "question": "Cách viết tập hợp nào sau đây là ĐÚNG theo quy ước?",
+            "options": [
+              "a = {1; 2; 3}",
+              "A = (1; 2; 3)",
+              "A = {1; 2; 3}",
+              "A = [1; 2; 3]"
+            ],
+            "correctIndex": 2,
+            "explanation": "Tên tập hợp phải viết bằng chữ cái in hoa, các phần tử đặt trong cặp ngoặc nhọn { } và cách nhau bởi dấu chấm phẩy. Vậy A = {1; 2; 3} là cách viết đúng."
+          },
+          {
+            "question": "Tập hợp N* khác với tập hợp N ở điểm nào?",
+            "options": [
+              "N* có thêm số 0 so với N",
+              "N* không chứa số 0, còn N chứa số 0",
+              "N* chỉ chứa số lẻ",
+              "N* và N hoàn toàn giống nhau"
+            ],
+            "correctIndex": 1,
+            "explanation": "N = {0; 1; 2; 3; ...} là tập số tự nhiên. N* = {1; 2; 3; ...} là tập số tự nhiên khác 0, tức N* không chứa số 0 còn N thì có."
+          },
+          {
+            "question": "Cho tập hợp D = {x ∈ N* | x < 1}. Tập hợp D là tập hợp gì?",
+            "options": [
+              "D = {0}",
+              "D = {1}",
+              "D là tập hợp rỗng (không có phần tử nào)",
+              "D = {0; 1}"
+            ],
+            "correctIndex": 2,
+            "explanation": "N* không chứa số 0, và không có số tự nhiên khác 0 nào nhỏ hơn 1. Do đó D không có phần tử nào, D là tập hợp rỗng."
+          },
+          {
+            "question": "Có bao nhiêu cách thường dùng để mô tả (viết) một tập hợp?",
+            "options": [
+              "1 cách",
+              "2 cách: liệt kê phần tử hoặc nêu dấu hiệu đặc trưng",
+              "3 cách",
+              "4 cách"
+            ],
+            "correctIndex": 1,
+            "explanation": "Có hai cách thường dùng để mô tả một tập hợp: liệt kê các phần tử, hoặc nêu dấu hiệu đặc trưng cho các phần tử của tập hợp."
           }
         ]
       },
@@ -122,6 +324,204 @@ Hệ số La Mã sử dụng các chữ số cơ bản: $\\mathrm{I} = 1$, $\\ma
             ],
             correctIndex: 2,
             explanation: "Trong số 15 284, chữ số 5 nằm ở hàng nghìn, nên nó có giá trị biểu diễn là 5 000."
+          },
+          {
+            "question": "Trong số 35 827, chữ số 8 thuộc hàng trăm và có giá trị là bao nhiêu?",
+            "options": [
+              "80",
+              "800",
+              "1 200",
+              "8 000"
+            ],
+            "correctIndex": 1,
+            "explanation": "Chữ số 8 nằm ở hàng trăm của số 35 827, nên giá trị của nó là 800."
+          },
+          {
+            "question": "Trong số 94 162, chữ số 4 thuộc hàng nghìn và có giá trị là bao nhiêu?",
+            "options": [
+              "400",
+              "6 000",
+              "4 000",
+              "40 000"
+            ],
+            "correctIndex": 2,
+            "explanation": "Chữ số 4 nằm ở hàng nghìn của số 94 162, nên giá trị của nó là 4 000."
+          },
+          {
+            "question": "Trong số 271 905, chữ số 9 thuộc hàng trăm và có giá trị là bao nhiêu?",
+            "options": [
+              "90",
+              "1 350",
+              "9 000",
+              "900"
+            ],
+            "correctIndex": 3,
+            "explanation": "Chữ số 9 nằm ở hàng trăm của số 271 905, nên giá trị của nó là 900."
+          },
+          {
+            "question": "Trong số 58 346, chữ số 5 thuộc hàng chục nghìn và có giá trị là bao nhiêu?",
+            "options": [
+              "50 000",
+              "500 000",
+              "75 000",
+              "5 000"
+            ],
+            "correctIndex": 0,
+            "explanation": "Chữ số 5 nằm ở hàng chục nghìn của số 58 346, nên giá trị của nó là 50 000."
+          },
+          {
+            "question": "Trong số 73 208, chữ số 2 thuộc hàng trăm và có giá trị là bao nhiêu?",
+            "options": [
+              "200",
+              "20",
+              "2 000",
+              "300"
+            ],
+            "correctIndex": 0,
+            "explanation": "Chữ số 2 nằm ở hàng trăm của số 73 208, nên giá trị của nó là 200."
+          },
+          {
+            "question": "Trong số 609 154, chữ số 6 thuộc hàng trăm nghìn và có giá trị là bao nhiêu?",
+            "options": [
+              "600 000",
+              "6 000 000",
+              "900 000",
+              "60 000"
+            ],
+            "correctIndex": 0,
+            "explanation": "Chữ số 6 nằm ở hàng trăm nghìn của số 609 154, nên giá trị của nó là 600 000."
+          },
+          {
+            "question": "Số La Mã nào biểu diễn số 14?",
+            "options": [
+              "XV",
+              "XVI",
+              "XIII",
+              "XIV"
+            ],
+            "correctIndex": 3,
+            "explanation": "Số 14 được biểu diễn trong hệ La Mã là XIV."
+          },
+          {
+            "question": "Số La Mã nào biểu diễn số 19?",
+            "options": [
+              "XIX",
+              "XXI",
+              "XVIII",
+              "XX"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số 19 được biểu diễn trong hệ La Mã là XIX."
+          },
+          {
+            "question": "Số La Mã nào biểu diễn số 23?",
+            "options": [
+              "XXV",
+              "XXIII",
+              "XXIV",
+              "XXII"
+            ],
+            "correctIndex": 1,
+            "explanation": "Số 23 được biểu diễn trong hệ La Mã là XXIII."
+          },
+          {
+            "question": "Số La Mã nào biểu diễn số 28?",
+            "options": [
+              "XXVIII",
+              "XXVII",
+              "XXX",
+              "XXIX"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số 28 được biểu diễn trong hệ La Mã là XXVIII."
+          },
+          {
+            "question": "Số La Mã nào biểu diễn số 17?",
+            "options": [
+              "XVII",
+              "XVIII",
+              "XIX",
+              "XVI"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số 17 được biểu diễn trong hệ La Mã là XVII."
+          },
+          {
+            "question": "Số La Mã nào biểu diễn số 22?",
+            "options": [
+              "XXIV",
+              "XXI",
+              "XXIII",
+              "XXII"
+            ],
+            "correctIndex": 3,
+            "explanation": "Số 22 được biểu diễn trong hệ La Mã là XXII."
+          },
+          {
+            "question": "Số La Mã nào biểu diễn số 9?",
+            "options": [
+              "XI",
+              "IX",
+              "X",
+              "VIII"
+            ],
+            "correctIndex": 1,
+            "explanation": "Số 9 được biểu diễn trong hệ La Mã là IX."
+          },
+          {
+            "question": "Số La Mã nào biểu diễn số 26?",
+            "options": [
+              "XXVI",
+              "XXVII",
+              "XXVIII",
+              "XXV"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số 26 được biểu diễn trong hệ La Mã là XXVI."
+          },
+          {
+            "question": "Số La Mã XVI tương ứng với số tự nhiên nào?",
+            "options": [
+              "16",
+              "17",
+              "6",
+              "15"
+            ],
+            "correctIndex": 0,
+            "explanation": "Đổi số La Mã XVI sang hệ thập phân ta được 16."
+          },
+          {
+            "question": "Số La Mã XXIV tương ứng với số tự nhiên nào?",
+            "options": [
+              "25",
+              "23",
+              "24",
+              "14"
+            ],
+            "correctIndex": 2,
+            "explanation": "Đổi số La Mã XXIV sang hệ thập phân ta được 24."
+          },
+          {
+            "question": "Số La Mã XIX tương ứng với số tự nhiên nào?",
+            "options": [
+              "19",
+              "20",
+              "9",
+              "18"
+            ],
+            "correctIndex": 0,
+            "explanation": "Đổi số La Mã XIX sang hệ thập phân ta được 19."
+          },
+          {
+            "question": "Số La Mã XXVIII tương ứng với số tự nhiên nào?",
+            "options": [
+              "28",
+              "29",
+              "27",
+              "18"
+            ],
+            "correctIndex": 0,
+            "explanation": "Đổi số La Mã XXVIII sang hệ thập phân ta được 28."
           }
         ]
       },
@@ -163,6 +563,204 @@ Hệ số La Mã sử dụng các chữ số cơ bản: $\\mathrm{I} = 1$, $\\ma
             ],
             correctIndex: 2,
             explanation: "Kí hiệu 12 ≤ x có lấy dấu bằng (x nhận giá trị 12), x < 15 không lấy dấu bằng (x không nhận giá trị 15). Các số tự nhiên thỏa mãn là {12; 13; 14}."
+          },
+          {
+            "question": "So sánh hai số 482 và 479.",
+            "options": [
+              "Không thể so sánh 482 và 479",
+              "482 = 479",
+              "482 < 479",
+              "482 > 479"
+            ],
+            "correctIndex": 3,
+            "explanation": "So sánh 482 và 479 theo giá trị, ta có 482 > 479."
+          },
+          {
+            "question": "So sánh hai số 1305 và 1350.",
+            "options": [
+              "Không thể so sánh 1305 và 1350",
+              "1305 = 1350",
+              "1305 > 1350",
+              "1305 < 1350"
+            ],
+            "correctIndex": 3,
+            "explanation": "So sánh 1305 và 1350 theo giá trị, ta có 1305 < 1350."
+          },
+          {
+            "question": "So sánh hai số 9999 và 10000.",
+            "options": [
+              "9999 < 10000",
+              "9999 > 10000",
+              "9999 = 10000",
+              "Không thể so sánh 9999 và 10000"
+            ],
+            "correctIndex": 0,
+            "explanation": "So sánh 9999 và 10000 theo giá trị, ta có 9999 < 10000."
+          },
+          {
+            "question": "So sánh hai số 27045 và 27054.",
+            "options": [
+              "27045 = 27054",
+              "27045 > 27054",
+              "27045 < 27054",
+              "Không thể so sánh 27045 và 27054"
+            ],
+            "correctIndex": 2,
+            "explanation": "So sánh 27045 và 27054 theo giá trị, ta có 27045 < 27054."
+          },
+          {
+            "question": "So sánh hai số 500 và 500.",
+            "options": [
+              "500 > 500",
+              "Không thể so sánh 500 và 500",
+              "500 = 500",
+              "500 < 500"
+            ],
+            "correctIndex": 2,
+            "explanation": "So sánh 500 và 500 theo giá trị, ta có 500 = 500."
+          },
+          {
+            "question": "Viết tập hợp các số tự nhiên x thỏa mãn 15 ≤ x < 20 dưới dạng liệt kê.",
+            "options": [
+              "{15; 16; 17; 18; 19; 20}",
+              "{15; 16; 17; 18; 19}",
+              "{16; 17; 18; 19; 20}",
+              "{16; 17; 18; 19}"
+            ],
+            "correctIndex": 1,
+            "explanation": "x nhận các giá trị từ 15 đến 19 (không tính 20). Vậy tập hợp cần tìm là {15; 16; 17; 18; 19}."
+          },
+          {
+            "question": "Viết tập hợp các số tự nhiên x thỏa mãn 23 ≤ x < 28 dưới dạng liệt kê.",
+            "options": [
+              "{24; 25; 26; 27}",
+              "{23; 24; 25; 26; 27; 28}",
+              "{24; 25; 26; 27; 28}",
+              "{23; 24; 25; 26; 27}"
+            ],
+            "correctIndex": 3,
+            "explanation": "x nhận các giá trị từ 23 đến 27 (không tính 28). Vậy tập hợp cần tìm là {23; 24; 25; 26; 27}."
+          },
+          {
+            "question": "Viết tập hợp các số tự nhiên x thỏa mãn 7 ≤ x < 12 dưới dạng liệt kê.",
+            "options": [
+              "{8; 9; 10; 11}",
+              "{7; 8; 9; 10; 11}",
+              "{7; 8; 9; 10; 11; 12}",
+              "{8; 9; 10; 11; 12}"
+            ],
+            "correctIndex": 1,
+            "explanation": "x nhận các giá trị từ 7 đến 11 (không tính 12). Vậy tập hợp cần tìm là {7; 8; 9; 10; 11}."
+          },
+          {
+            "question": "Viết tập hợp các số tự nhiên x thỏa mãn 100 ≤ x < 105 dưới dạng liệt kê.",
+            "options": [
+              "{100; 101; 102; 103; 104}",
+              "{100; 101; 102; 103; 104; 105}",
+              "{101; 102; 103; 104; 105}",
+              "{101; 102; 103; 104}"
+            ],
+            "correctIndex": 0,
+            "explanation": "x nhận các giá trị từ 100 đến 104 (không tính 105). Vậy tập hợp cần tìm là {100; 101; 102; 103; 104}."
+          },
+          {
+            "question": "Khẳng định nào sau đây thể hiện đúng tính chất bắc cầu?",
+            "options": [
+              "Nếu a < b và b < c thì a < c",
+              "Nếu a < b thì b < a",
+              "Nếu a < b và b < c thì a > c",
+              "Nếu a = b thì a < b"
+            ],
+            "correctIndex": 0,
+            "explanation": "Tính chất bắc cầu: nếu a < b và b < c thì suy ra a < c."
+          },
+          {
+            "question": "Trên tia số nằm ngang, điểm biểu diễn số 12 nằm ở vị trí nào so với điểm biểu diễn số 18?",
+            "options": [
+              "Bên phải điểm 18",
+              "Bên trái điểm 18",
+              "Trùng với điểm 18",
+              "Không thể xác định"
+            ],
+            "correctIndex": 1,
+            "explanation": "Vì 12 < 18 nên trên tia số nằm ngang, điểm biểu diễn số 12 nằm bên trái điểm biểu diễn số 18."
+          },
+          {
+            "question": "Số liền sau của số tự nhiên 999 là số nào?",
+            "options": [
+              "998",
+              "1000",
+              "9999",
+              "990"
+            ],
+            "correctIndex": 1,
+            "explanation": "Số liền sau của một số tự nhiên a là a + 1. Vậy số liền sau của 999 là 999 + 1 = 1000."
+          },
+          {
+            "question": "Số tự nhiên nào KHÔNG có số liền trước?",
+            "options": [
+              "1",
+              "0",
+              "2",
+              "Không có số nào"
+            ],
+            "correctIndex": 1,
+            "explanation": "Số 0 là số tự nhiên nhỏ nhất nên không có số tự nhiên liền trước nó."
+          },
+          {
+            "question": "Cho a ≥ 7 và a ≤ 9. Số tự nhiên a có thể nhận những giá trị nào?",
+            "options": [
+              "a = 7 hoặc a = 9",
+              "a ∈ {7; 8; 9}",
+              "a ∈ {8}",
+              "a ∈ {7; 8}"
+            ],
+            "correctIndex": 1,
+            "explanation": "Điều kiện 7 ≤ a ≤ 9 nghĩa là a nhận các giá trị 7, 8 hoặc 9 (đều lấy dấu bằng ở cả hai đầu)."
+          },
+          {
+            "question": "Kí hiệu a ≤ b được đọc như thế nào?",
+            "options": [
+              "a nhỏ hơn b",
+              "a lớn hơn b",
+              "a nhỏ hơn hoặc bằng b",
+              "a khác b"
+            ],
+            "correctIndex": 2,
+            "explanation": "Kí hiệu a ≤ b nghĩa là a < b hoặc a = b, đọc là 'a nhỏ hơn hoặc bằng b'."
+          },
+          {
+            "question": "Nếu a < b và b = c thì kết luận nào sau đây đúng?",
+            "options": [
+              "a < c",
+              "a > c",
+              "a = c",
+              "Không so sánh được"
+            ],
+            "correctIndex": 0,
+            "explanation": "Vì b = c nên có thể thay c vào vị trí của b trong bất đẳng thức a < b, suy ra a < c."
+          },
+          {
+            "question": "Điểm gốc O trên tia số biểu diễn số tự nhiên nào?",
+            "options": [
+              "1",
+              "0",
+              "10",
+              "Không biểu diễn số nào"
+            ],
+            "correctIndex": 1,
+            "explanation": "Trên tia số, điểm gốc O luôn biểu diễn số 0, là điểm xuất phát của tia số."
+          },
+          {
+            "question": "Cho ba số tự nhiên liên tiếp có số ở giữa là 20. Hai số còn lại là số nào?",
+            "options": [
+              "18 và 22",
+              "19 và 20",
+              "19 và 21",
+              "20 và 21"
+            ],
+            "correctIndex": 2,
+            "explanation": "Ba số tự nhiên liên tiếp có số ở giữa là 20 thì số liền trước là 19 và số liền sau là 21."
           }
         ]
       },
@@ -207,6 +805,204 @@ Hệ số La Mã sử dụng các chữ số cơ bản: $\\mathrm{I} = 1$, $\\ma
             ],
             correctIndex: 2,
             explanation: "Trong tập hợp số tự nhiên, phép trừ a - b chỉ thực hiện được khi a ≥ b. Vì 105 < 120 nên phép trừ này không thực hiện được trên tập N."
+          },
+          {
+            "question": "Tính tổng: 235 + 148 + 65",
+            "options": [
+              "438",
+              "449",
+              "458",
+              "448"
+            ],
+            "correctIndex": 3,
+            "explanation": "Cộng lần lượt các số hạng: 235 + 148 + 65 = 448."
+          },
+          {
+            "question": "Tính tổng: 327 + 89 + 173",
+            "options": [
+              "599",
+              "579",
+              "590",
+              "589"
+            ],
+            "correctIndex": 3,
+            "explanation": "Cộng lần lượt các số hạng: 327 + 89 + 173 = 589."
+          },
+          {
+            "question": "Tính tổng: 456 + 244 + 300",
+            "options": [
+              "1 010",
+              "990",
+              "1 000",
+              "1 001"
+            ],
+            "correctIndex": 2,
+            "explanation": "Cộng lần lượt các số hạng: 456 + 244 + 300 = 1 000."
+          },
+          {
+            "question": "Tính tổng: 512 + 88 + 400",
+            "options": [
+              "1 010",
+              "990",
+              "1 000",
+              "1 001"
+            ],
+            "correctIndex": 2,
+            "explanation": "Cộng lần lượt các số hạng: 512 + 88 + 400 = 1 000."
+          },
+          {
+            "question": "Tính tổng: 129 + 371 + 250",
+            "options": [
+              "750",
+              "740",
+              "751",
+              "760"
+            ],
+            "correctIndex": 0,
+            "explanation": "Cộng lần lượt các số hạng: 129 + 371 + 250 = 750."
+          },
+          {
+            "question": "Tính tổng: 618 + 182 + 200",
+            "options": [
+              "1 010",
+              "990",
+              "1 000",
+              "1 001"
+            ],
+            "correctIndex": 2,
+            "explanation": "Cộng lần lượt các số hạng: 618 + 182 + 200 = 1 000."
+          },
+          {
+            "question": "Tính hiệu: 1000 - 347",
+            "options": [
+              "663",
+              "653",
+              "753",
+              "643"
+            ],
+            "correctIndex": 1,
+            "explanation": "Thực hiện phép trừ: 1000 - 347 = 653."
+          },
+          {
+            "question": "Tính hiệu: 2024 - 876",
+            "options": [
+              "1 138",
+              "1 248",
+              "1 158",
+              "1 148"
+            ],
+            "correctIndex": 3,
+            "explanation": "Thực hiện phép trừ: 2024 - 876 = 1 148."
+          },
+          {
+            "question": "Tính hiệu: 5000 - 1234",
+            "options": [
+              "3 866",
+              "3 776",
+              "3 756",
+              "3 766"
+            ],
+            "correctIndex": 3,
+            "explanation": "Thực hiện phép trừ: 5000 - 1234 = 3 766."
+          },
+          {
+            "question": "Tính hiệu: 837 - 592",
+            "options": [
+              "255",
+              "245",
+              "235",
+              "345"
+            ],
+            "correctIndex": 1,
+            "explanation": "Thực hiện phép trừ: 837 - 592 = 245."
+          },
+          {
+            "question": "Phép trừ 58 - 91 có thực hiện được trong tập hợp số tự nhiên N không?",
+            "options": [
+              "Thực hiện được, vì 58 ≥ 91",
+              "Không thực hiện được, vì 58 < 91",
+              "Thực hiện được, kết quả bằng 33",
+              "Thực hiện được, kết quả bằng -33"
+            ],
+            "correctIndex": 1,
+            "explanation": "Phép trừ a - b chỉ thực hiện được trong N khi a ≥ b. Không thực hiện được, vì 58 < 91."
+          },
+          {
+            "question": "Phép trừ 204 - 150 có thực hiện được trong tập hợp số tự nhiên N không?",
+            "options": [
+              "Thực hiện được, kết quả bằng 54",
+              "Thực hiện được, kết quả bằng 55",
+              "Không thực hiện được, vì 204 < 150",
+              "Thực hiện được, kết quả bằng 354"
+            ],
+            "correctIndex": 0,
+            "explanation": "Phép trừ a - b chỉ thực hiện được trong N khi a ≥ b. Thực hiện được, kết quả bằng 54."
+          },
+          {
+            "question": "Phép trừ 77 - 200 có thực hiện được trong tập hợp số tự nhiên N không?",
+            "options": [
+              "Thực hiện được, vì 77 ≥ 200",
+              "Không thực hiện được, vì 77 < 200",
+              "Thực hiện được, kết quả bằng 123",
+              "Thực hiện được, kết quả bằng -123"
+            ],
+            "correctIndex": 1,
+            "explanation": "Phép trừ a - b chỉ thực hiện được trong N khi a ≥ b. Không thực hiện được, vì 77 < 200."
+          },
+          {
+            "question": "Phép trừ 999 - 998 có thực hiện được trong tập hợp số tự nhiên N không?",
+            "options": [
+              "Thực hiện được, kết quả bằng 1997",
+              "Không thực hiện được, vì 999 < 998",
+              "Thực hiện được, kết quả bằng 2",
+              "Thực hiện được, kết quả bằng 1"
+            ],
+            "correctIndex": 3,
+            "explanation": "Phép trừ a - b chỉ thực hiện được trong N khi a ≥ b. Thực hiện được, kết quả bằng 1."
+          },
+          {
+            "question": "Tính chất nào của phép cộng được thể hiện qua đẳng thức: 25 + 17 = 17 + 25?",
+            "options": [
+              "Tính chất kết hợp",
+              "Tính chất giao hoán",
+              "Tính chất phân phối",
+              "Cộng với số 0"
+            ],
+            "correctIndex": 1,
+            "explanation": "Tính chất giao hoán của phép cộng: a + b = b + a. Đẳng thức 25 + 17 = 17 + 25 thể hiện đúng tính chất này."
+          },
+          {
+            "question": "Tính chất nào của phép cộng được thể hiện qua đẳng thức: (12 + 8) + 5 = 12 + (8 + 5)?",
+            "options": [
+              "Tính chất giao hoán",
+              "Tính chất kết hợp",
+              "Cộng với số 0",
+              "Không có tính chất nào"
+            ],
+            "correctIndex": 1,
+            "explanation": "Tính chất kết hợp của phép cộng: (a + b) + c = a + (b + c). Đây chính là điều đẳng thức đã thể hiện."
+          },
+          {
+            "question": "Trong phép trừ a - b = x, số a được gọi là gì?",
+            "options": [
+              "Số trừ",
+              "Hiệu",
+              "Số bị trừ",
+              "Thương"
+            ],
+            "correctIndex": 2,
+            "explanation": "Trong phép trừ Số bị trừ - Số trừ = Hiệu, số a đứng trước dấu trừ được gọi là số bị trừ."
+          },
+          {
+            "question": "Tính nhanh: 998 + 236 bằng cách thêm bớt hợp lý.",
+            "options": [
+              "1234",
+              "1224",
+              "1244",
+              "1214"
+            ],
+            "correctIndex": 0,
+            "explanation": "Ta có thể tính: 998 + 236 = (1000 - 2) + 236 = 1000 + 236 - 2 = 1236 - 2 = 1234."
           }
         ]
       },
@@ -251,6 +1047,204 @@ $$a = b \\cdot q + r \\quad \\text{với } 0 \\le r < b$$
             ],
             correctIndex: 1,
             explanation: "Ta có thể phân tích: 24 * 25 = (6 * 4) * 25 = 6 * (4 * 25) = 6 * 100 = 600. Hoặc sử dụng 24 * 25 = 24 * (100 / 4) = 2400 / 4 = 600."
+          },
+          {
+            "question": "Thực hiện phép chia 157 cho 6. Tìm thương và số dư.",
+            "options": [
+              "Thương = 25, số dư = 1",
+              "Thương = 27, số dư = 1",
+              "Thương = 26, số dư = 1",
+              "Thương = 26, số dư = 2"
+            ],
+            "correctIndex": 2,
+            "explanation": "Ta có 157 = 6 × 26 + 1, với 0 ≤ 1 < 6. Vậy thương là 26 và số dư là 1."
+          },
+          {
+            "question": "Thực hiện phép chia 200 cho 9. Tìm thương và số dư.",
+            "options": [
+              "Thương = 22, số dư = 3",
+              "Thương = 21, số dư = 2",
+              "Thương = 22, số dư = 2",
+              "Thương = 23, số dư = 2"
+            ],
+            "correctIndex": 2,
+            "explanation": "Ta có 200 = 9 × 22 + 2, với 0 ≤ 2 < 9. Vậy thương là 22 và số dư là 2."
+          },
+          {
+            "question": "Thực hiện phép chia 345 cho 8. Tìm thương và số dư.",
+            "options": [
+              "Thương = 44, số dư = 1",
+              "Thương = 43, số dư = 1",
+              "Thương = 42, số dư = 1",
+              "Thương = 43, số dư = 2"
+            ],
+            "correctIndex": 1,
+            "explanation": "Ta có 345 = 8 × 43 + 1, với 0 ≤ 1 < 8. Vậy thương là 43 và số dư là 1."
+          },
+          {
+            "question": "Thực hiện phép chia 89 cho 7. Tìm thương và số dư.",
+            "options": [
+              "Thương = 12, số dư = 6",
+              "Thương = 13, số dư = 5",
+              "Thương = 12, số dư = 5",
+              "Thương = 11, số dư = 5"
+            ],
+            "correctIndex": 2,
+            "explanation": "Ta có 89 = 7 × 12 + 5, với 0 ≤ 5 < 7. Vậy thương là 12 và số dư là 5."
+          },
+          {
+            "question": "Thực hiện phép chia 500 cho 13. Tìm thương và số dư.",
+            "options": [
+              "Thương = 38, số dư = 6",
+              "Thương = 38, số dư = 7",
+              "Thương = 37, số dư = 6",
+              "Thương = 39, số dư = 6"
+            ],
+            "correctIndex": 0,
+            "explanation": "Ta có 500 = 13 × 38 + 6, với 0 ≤ 6 < 13. Vậy thương là 38 và số dư là 6."
+          },
+          {
+            "question": "Thực hiện phép chia 276 cho 11. Tìm thương và số dư.",
+            "options": [
+              "Thương = 25, số dư = 2",
+              "Thương = 24, số dư = 1",
+              "Thương = 26, số dư = 1",
+              "Thương = 25, số dư = 1"
+            ],
+            "correctIndex": 3,
+            "explanation": "Ta có 276 = 11 × 25 + 1, với 0 ≤ 1 < 11. Vậy thương là 25 và số dư là 1."
+          },
+          {
+            "question": "Tính tích: 23 × 45",
+            "options": [
+              "1 035",
+              "990",
+              "1 058",
+              "1 045"
+            ],
+            "correctIndex": 0,
+            "explanation": "Thực hiện phép nhân: 23 × 45 = 1 035."
+          },
+          {
+            "question": "Tính tích: 67 × 32",
+            "options": [
+              "2 112",
+              "2 211",
+              "2 154",
+              "2 144"
+            ],
+            "correctIndex": 3,
+            "explanation": "Thực hiện phép nhân: 67 × 32 = 2 144."
+          },
+          {
+            "question": "Tính tích: 125 × 16",
+            "options": [
+              "2 010",
+              "2 125",
+              "2 000",
+              "1 984"
+            ],
+            "correctIndex": 2,
+            "explanation": "Thực hiện phép nhân: 125 × 16 = 2 000."
+          },
+          {
+            "question": "Tính tích: 48 × 29",
+            "options": [
+              "1 440",
+              "1 392",
+              "1 402",
+              "1 363"
+            ],
+            "correctIndex": 1,
+            "explanation": "Thực hiện phép nhân: 48 × 29 = 1 392."
+          },
+          {
+            "question": "Áp dụng tính chất phân phối để tính nhanh: 15 × 204",
+            "options": [
+              "3 075",
+              "3 045",
+              "3 160",
+              "3 060"
+            ],
+            "correctIndex": 3,
+            "explanation": "Ta có thể tách 204 thành tổng/hiệu thuận lợi rồi phân phối phép nhân. Kết quả cuối cùng là 15 × 204 = 3 060."
+          },
+          {
+            "question": "Áp dụng tính chất phân phối để tính nhanh: 23 × 102",
+            "options": [
+              "2 346",
+              "2 369",
+              "2 323",
+              "2 446"
+            ],
+            "correctIndex": 0,
+            "explanation": "Ta có thể tách 102 thành tổng/hiệu thuận lợi rồi phân phối phép nhân. Kết quả cuối cùng là 23 × 102 = 2 346."
+          },
+          {
+            "question": "Áp dụng tính chất phân phối để tính nhanh: 45 × 101",
+            "options": [
+              "4 645",
+              "4 545",
+              "4 500",
+              "4 590"
+            ],
+            "correctIndex": 1,
+            "explanation": "Ta có thể tách 101 thành tổng/hiệu thuận lợi rồi phân phối phép nhân. Kết quả cuối cùng là 45 × 101 = 4 545."
+          },
+          {
+            "question": "Áp dụng tính chất phân phối để tính nhanh: 12 × 998",
+            "options": [
+              "11 976",
+              "11 988",
+              "11 964",
+              "12 076"
+            ],
+            "correctIndex": 0,
+            "explanation": "Ta có thể tách 998 thành tổng/hiệu thuận lợi rồi phân phối phép nhân. Kết quả cuối cùng là 12 × 998 = 11 976."
+          },
+          {
+            "question": "Trong phép chia có dư a = b × q + r, điều kiện nào của r luôn đúng?",
+            "options": [
+              "r > b",
+              "0 ≤ r < b",
+              "r = b",
+              "r < 0"
+            ],
+            "correctIndex": 1,
+            "explanation": "Trong phép chia có dư, số dư r luôn thỏa mãn điều kiện 0 ≤ r < b (b là số chia)."
+          },
+          {
+            "question": "Phép chia nào sau đây là phép chia hết?",
+            "options": [
+              "17 : 5",
+              "144 : 12",
+              "100 : 7",
+              "50 : 3"
+            ],
+            "correctIndex": 1,
+            "explanation": "Ta kiểm tra: 144 : 12 = 12 (dư 0) nên đây là phép chia hết. Các phép chia còn lại đều có số dư khác 0."
+          },
+          {
+            "question": "Tính chất phân phối của phép nhân đối với phép cộng được viết đúng là:",
+            "options": [
+              "a × (b + c) = a × b + c",
+              "a × (b + c) = a × b + a × c",
+              "a × (b + c) = a + b × c",
+              "a × (b + c) = (a + b) × c"
+            ],
+            "correctIndex": 1,
+            "explanation": "Tính chất phân phối của phép nhân với phép cộng: a × (b + c) = a × b + a × c."
+          },
+          {
+            "question": "Kết quả của phép tính 0 : 25 là bao nhiêu?",
+            "options": [
+              "0",
+              "25",
+              "Không xác định",
+              "1"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số 0 chia cho bất kỳ số nào khác 0 đều bằng 0. Vậy 0 : 25 = 0."
           }
         ]
       },
@@ -298,6 +1292,204 @@ $$a^m : a^n = a^{m-n} \\quad (a \\neq 0, m \\ge n)$$`,
             ],
             correctIndex: 1,
             explanation: "Vì 3^3 = 3 * 3 * 3 = 27, nên số tự nhiên x thỏa mãn x^3 = 27 là x = 3."
+          },
+          {
+            "question": "Tính giá trị của lũy thừa 2^7.",
+            "options": [
+              "64",
+              "128",
+              "126",
+              "256"
+            ],
+            "correctIndex": 1,
+            "explanation": "2^7 là tích của 7 thừa số 2: 2^7 = 128."
+          },
+          {
+            "question": "Tính giá trị của lũy thừa 3^5.",
+            "options": [
+              "729",
+              "240",
+              "243",
+              "81"
+            ],
+            "correctIndex": 2,
+            "explanation": "3^5 là tích của 5 thừa số 3: 3^5 = 243."
+          },
+          {
+            "question": "Tính giá trị của lũy thừa 5^4.",
+            "options": [
+              "3125",
+              "620",
+              "125",
+              "625"
+            ],
+            "correctIndex": 3,
+            "explanation": "5^4 là tích của 4 thừa số 5: 5^4 = 625."
+          },
+          {
+            "question": "Tính giá trị của lũy thừa 4^4.",
+            "options": [
+              "252",
+              "256",
+              "1024",
+              "64"
+            ],
+            "correctIndex": 1,
+            "explanation": "4^4 là tích của 4 thừa số 4: 4^4 = 256."
+          },
+          {
+            "question": "Tính giá trị của lũy thừa 6^3.",
+            "options": [
+              "36",
+              "1296",
+              "210",
+              "216"
+            ],
+            "correctIndex": 3,
+            "explanation": "6^3 là tích của 3 thừa số 6: 6^3 = 216."
+          },
+          {
+            "question": "Tính giá trị của lũy thừa 7^3.",
+            "options": [
+              "336",
+              "343",
+              "2401",
+              "49"
+            ],
+            "correctIndex": 1,
+            "explanation": "7^3 là tích của 3 thừa số 7: 7^3 = 343."
+          },
+          {
+            "question": "Viết kết quả của 3^4 × 3^2 dưới dạng một lũy thừa.",
+            "options": [
+              "3^8",
+              "3^6",
+              "3^2",
+              "9^6"
+            ],
+            "correctIndex": 1,
+            "explanation": "Khi nhân hai lũy thừa cùng cơ số, ta giữ nguyên cơ số và cộng hai số mũ: 3^4 × 3^2 = 3^{4+2} = 3^6."
+          },
+          {
+            "question": "Viết kết quả của 2^5 × 2^3 dưới dạng một lũy thừa.",
+            "options": [
+              "4^8",
+              "2^15",
+              "2^8",
+              "2^2"
+            ],
+            "correctIndex": 2,
+            "explanation": "Khi nhân hai lũy thừa cùng cơ số, ta giữ nguyên cơ số và cộng hai số mũ: 2^5 × 2^3 = 2^{5+3} = 2^8."
+          },
+          {
+            "question": "Viết kết quả của 5^3 × 5^4 dưới dạng một lũy thừa.",
+            "options": [
+              "25^7",
+              "5^7",
+              "5^1",
+              "5^12"
+            ],
+            "correctIndex": 1,
+            "explanation": "Khi nhân hai lũy thừa cùng cơ số, ta giữ nguyên cơ số và cộng hai số mũ: 5^3 × 5^4 = 5^{3+4} = 5^7."
+          },
+          {
+            "question": "Viết kết quả của 7^2 × 7^3 dưới dạng một lũy thừa.",
+            "options": [
+              "7^5",
+              "7^1",
+              "7^6",
+              "49^5"
+            ],
+            "correctIndex": 0,
+            "explanation": "Khi nhân hai lũy thừa cùng cơ số, ta giữ nguyên cơ số và cộng hai số mũ: 7^2 × 7^3 = 7^{2+3} = 7^5."
+          },
+          {
+            "question": "Viết kết quả của 5^7 : 5^3 dưới dạng một lũy thừa (a ≠ 0).",
+            "options": [
+              "5^10",
+              "5^21",
+              "5^4",
+              "5^5"
+            ],
+            "correctIndex": 2,
+            "explanation": "Khi chia hai lũy thừa cùng cơ số, ta giữ nguyên cơ số và trừ hai số mũ: 5^7 : 5^3 = 5^{7-3} = 5^4."
+          },
+          {
+            "question": "Viết kết quả của 3^8 : 3^5 dưới dạng một lũy thừa (a ≠ 0).",
+            "options": [
+              "3^4",
+              "3^13",
+              "3^40",
+              "3^3"
+            ],
+            "correctIndex": 3,
+            "explanation": "Khi chia hai lũy thừa cùng cơ số, ta giữ nguyên cơ số và trừ hai số mũ: 3^8 : 3^5 = 3^{8-5} = 3^3."
+          },
+          {
+            "question": "Viết kết quả của 2^9 : 2^4 dưới dạng một lũy thừa (a ≠ 0).",
+            "options": [
+              "2^6",
+              "2^5",
+              "2^36",
+              "2^13"
+            ],
+            "correctIndex": 1,
+            "explanation": "Khi chia hai lũy thừa cùng cơ số, ta giữ nguyên cơ số và trừ hai số mũ: 2^9 : 2^4 = 2^{9-4} = 2^5."
+          },
+          {
+            "question": "Viết kết quả của 4^6 : 4^2 dưới dạng một lũy thừa (a ≠ 0).",
+            "options": [
+              "4^8",
+              "4^12",
+              "4^5",
+              "4^4"
+            ],
+            "correctIndex": 3,
+            "explanation": "Khi chia hai lũy thừa cùng cơ số, ta giữ nguyên cơ số và trừ hai số mũ: 4^6 : 4^2 = 4^{6-2} = 4^4."
+          },
+          {
+            "question": "Trong lũy thừa a^n, thành phần n được gọi là gì?",
+            "options": [
+              "Cơ số",
+              "Số mũ",
+              "Tích",
+              "Thương"
+            ],
+            "correctIndex": 1,
+            "explanation": "Trong biểu thức a^n, a là cơ số và n là số mũ."
+          },
+          {
+            "question": "Giá trị của 5^0 là bao nhiêu?",
+            "options": [
+              "0",
+              "5",
+              "1",
+              "Không xác định"
+            ],
+            "correctIndex": 2,
+            "explanation": "Theo quy ước, mọi số khác 0 có lũy thừa bậc 0 đều bằng 1. Vậy 5^0 = 1."
+          },
+          {
+            "question": "Số nào sau đây được gọi là 'lập phương' của 4?",
+            "options": [
+              "4^1 = 4",
+              "4^2 = 16",
+              "4^3 = 64",
+              "4^4 = 256"
+            ],
+            "correctIndex": 2,
+            "explanation": "Lập phương của một số là lũy thừa bậc 3 của số đó. Lập phương của 4 là 4^3 = 64."
+          },
+          {
+            "question": "Tìm số tự nhiên x biết x^2 = 49.",
+            "options": [
+              "x = 24,5",
+              "x = 7",
+              "x = 9",
+              "x = 14"
+            ],
+            "correctIndex": 1,
+            "explanation": "Vì 7 × 7 = 49 = 7^2, nên số tự nhiên x thỏa mãn x^2 = 49 là x = 7."
           }
         ]
       },
@@ -341,6 +1533,204 @@ $$\\text{Trong ngoặc tròn } (\\quad) \\rightarrow \\text{Trong ngoặc vuông
             ],
             correctIndex: 1,
             explanation: "Thực hiện trong ngoặc tròn trước: (10 - 5) = 5. Lũy thừa: 5^2 = 25. Thực hiện trong ngoặc vuông: 30 - 25 = 5. Cuối cùng thực hiện phép trừ ngoài cùng: 50 - 5 = 45."
+          },
+          {
+            "question": "Tính giá trị biểu thức: 6 + 4 × 3^2",
+            "options": [
+              "42",
+              "44",
+              "40",
+              "52"
+            ],
+            "correctIndex": 0,
+            "explanation": "Thực hiện lũy thừa trước: 3^2 = 9. Nhân: 4 × 9 = 36. Cộng: 6 + 36 = 42."
+          },
+          {
+            "question": "Tính giá trị biểu thức: (15 - 5) × 2 + 8",
+            "options": [
+              "26",
+              "38",
+              "30",
+              "28"
+            ],
+            "correctIndex": 3,
+            "explanation": "Trong ngoặc trước: 15 - 5 = 10. Nhân: 10 × 2 = 20. Cộng: 20 + 8 = 28."
+          },
+          {
+            "question": "Tính giá trị biểu thức: 100 - 4 × 5^2",
+            "options": [
+              "0",
+              "10",
+              "-2",
+              "2"
+            ],
+            "correctIndex": 0,
+            "explanation": "Lũy thừa trước: 5^2 = 25. Nhân: 4 × 25 = 100. Trừ: 100 - 100 = 0."
+          },
+          {
+            "question": "Tính giá trị biểu thức: 2^3 + 3 × (7 - 2)",
+            "options": [
+              "33",
+              "25",
+              "23",
+              "21"
+            ],
+            "correctIndex": 2,
+            "explanation": "Trong ngoặc: 7 - 2 = 5. Lũy thừa: 2^3 = 8. Nhân: 3 × 5 = 15. Cộng: 8 + 15 = 23."
+          },
+          {
+            "question": "Tính giá trị biểu thức: [20 - (6 + 2)] × 3",
+            "options": [
+              "38",
+              "34",
+              "46",
+              "36"
+            ],
+            "correctIndex": 3,
+            "explanation": "Trong ngoặc tròn: 6 + 2 = 8. Trong ngoặc vuông: 20 - 8 = 12. Nhân: 12 × 3 = 36."
+          },
+          {
+            "question": "Tính giá trị biểu thức: 48 : 4 + 3 × 6",
+            "options": [
+              "32",
+              "40",
+              "30",
+              "28"
+            ],
+            "correctIndex": 2,
+            "explanation": "Chia trước: 48 : 4 = 12. Nhân: 3 × 6 = 18. Cộng: 12 + 18 = 30."
+          },
+          {
+            "question": "Tính giá trị biểu thức: 5 × 4^2 - 30 : 5",
+            "options": [
+              "84",
+              "76",
+              "72",
+              "74"
+            ],
+            "correctIndex": 3,
+            "explanation": "Lũy thừa: 4^2 = 16. Nhân: 5 × 16 = 80. Chia: 30 : 5 = 6. Trừ: 80 - 6 = 74."
+          },
+          {
+            "question": "Tính giá trị biểu thức: 90 : [2 × (10 - 5)]",
+            "options": [
+              "11",
+              "7",
+              "9",
+              "19"
+            ],
+            "correctIndex": 2,
+            "explanation": "Trong ngoặc tròn: 10 - 5 = 5. Trong ngoặc vuông: 2 × 5 = 10. Chia: 90 : 10 = 9."
+          },
+          {
+            "question": "Tính giá trị biểu thức: 3 × 5 + 2 × 6",
+            "options": [
+              "29",
+              "25",
+              "27",
+              "37"
+            ],
+            "correctIndex": 2,
+            "explanation": "Không có ngoặc và không có lũy thừa nên nhân trước, cộng sau: 3 × 5 = 15; 2 × 6 = 12. Cộng: 15 + 12 = 27."
+          },
+          {
+            "question": "Tính giá trị biểu thức: 80 - 15 × 2^2",
+            "options": [
+              "18",
+              "20",
+              "30",
+              "22"
+            ],
+            "correctIndex": 1,
+            "explanation": "Lũy thừa trước: 2^2 = 4. Nhân: 15 × 4 = 60. Trừ: 80 - 60 = 20."
+          },
+          {
+            "question": "Tính giá trị biểu thức: (9 + 3) : 3 - 1",
+            "options": [
+              "1",
+              "13",
+              "3",
+              "5"
+            ],
+            "correctIndex": 2,
+            "explanation": "Trong ngoặc trước: 9 + 3 = 12. Chia: 12 : 3 = 4. Trừ: 4 - 1 = 3."
+          },
+          {
+            "question": "Tính giá trị biểu thức: 6^2 : 4 + 7",
+            "options": [
+              "14",
+              "18",
+              "16",
+              "26"
+            ],
+            "correctIndex": 2,
+            "explanation": "Lũy thừa trước: 6^2 = 36. Chia: 36 : 4 = 9. Cộng: 9 + 7 = 16."
+          },
+          {
+            "question": "Tính giá trị biểu thức: 2 × [15 - (4 + 3)]",
+            "options": [
+              "14",
+              "18",
+              "16",
+              "26"
+            ],
+            "correctIndex": 2,
+            "explanation": "Trong ngoặc tròn: 4 + 3 = 7. Trong ngoặc vuông: 15 - 7 = 8. Nhân: 2 × 8 = 16."
+          },
+          {
+            "question": "Tính giá trị biểu thức: 100 : 5^2 + 3 × 2",
+            "options": [
+              "8",
+              "10",
+              "12",
+              "20"
+            ],
+            "correctIndex": 1,
+            "explanation": "Lũy thừa: 5^2 = 25. Chia: 100 : 25 = 4. Nhân: 3 × 2 = 6. Cộng: 4 + 6 = 10."
+          },
+          {
+            "question": "Tính giá trị biểu thức: 7 + 2 × (12 - 4 × 2)",
+            "options": [
+              "15",
+              "17",
+              "13",
+              "25"
+            ],
+            "correctIndex": 0,
+            "explanation": "Trong ngoặc: 4 × 2 = 8, rồi 12 - 8 = 4. Nhân: 2 × 4 = 8. Cộng: 7 + 8 = 15."
+          },
+          {
+            "question": "Trong biểu thức không có dấu ngoặc, phép tính nào được ưu tiên thực hiện trước tiên?",
+            "options": [
+              "Cộng, trừ",
+              "Nhân, chia",
+              "Lũy thừa",
+              "Thực hiện từ trái sang phải theo thứ tự viết"
+            ],
+            "correctIndex": 2,
+            "explanation": "Thứ tự ưu tiên trong biểu thức không ngoặc là: Lũy thừa → Nhân và chia → Cộng và trừ. Vậy lũy thừa được ưu tiên trước."
+          },
+          {
+            "question": "Với biểu thức có dấu ngoặc, thứ tự thực hiện đúng là:",
+            "options": [
+              "Ngoặc nhọn → Ngoặc vuông → Ngoặc tròn",
+              "Ngoặc tròn → Ngoặc vuông → Ngoặc nhọn",
+              "Thực hiện đồng thời tất cả các ngoặc",
+              "Ngoặc vuông → Ngoặc tròn → Ngoặc nhọn"
+            ],
+            "correctIndex": 1,
+            "explanation": "Thứ tự thực hiện đúng với biểu thức có ngoặc là: trong ngoặc tròn ( ) trước, rồi đến ngoặc vuông [ ], cuối cùng là ngoặc nhọn { }."
+          },
+          {
+            "question": "Biểu thức 20 - 6 : 2 có giá trị bằng bao nhiêu?",
+            "options": [
+              "17",
+              "7",
+              "10",
+              "20"
+            ],
+            "correctIndex": 0,
+            "explanation": "Vì chỉ có trừ và chia nên ta ưu tiên phép chia trước: 6 : 2 = 3. Sau đó trừ: 20 - 3 = 17."
           }
         ]
       },
@@ -384,6 +1774,204 @@ $$\\text{Trong ngoặc tròn } (\\quad) \\rightarrow \\text{Trong ngoặc vuông
             ],
             correctIndex: 1,
             explanation: "Ta thấy 24 chia hết cho 3, 36 chia hết cho 3, và 15 cũng chia hết cho 3. Theo tính chất 1, tổng A chia hết cho 3."
+          },
+          {
+            "question": "Tìm tập hợp các ước của số 18.",
+            "options": [
+              "{1; 2; 3; 6; 9}",
+              "{1; 2; 3; 6; 9; 18}",
+              "{1; 2; 3; 6; 9; 18; 19}",
+              "{2; 3; 6; 9; 18}"
+            ],
+            "correctIndex": 1,
+            "explanation": "Lần lượt kiểm tra các số từ 1 đến 18 chia hết cho 18, ta được U(18) = {1; 2; 3; 6; 9; 18}."
+          },
+          {
+            "question": "Tìm tập hợp các ước của số 24.",
+            "options": [
+              "{1; 2; 3; 4; 6; 8; 12}",
+              "{1; 2; 3; 4; 6; 8; 12; 24; 25}",
+              "{1; 2; 3; 4; 6; 8; 12; 24}",
+              "{2; 3; 4; 6; 8; 12; 24}"
+            ],
+            "correctIndex": 2,
+            "explanation": "Lần lượt kiểm tra các số từ 1 đến 24 chia hết cho 24, ta được U(24) = {1; 2; 3; 4; 6; 8; 12; 24}."
+          },
+          {
+            "question": "Tìm tập hợp các ước của số 36.",
+            "options": [
+              "{2; 3; 4; 6; 9; 12; 18; 36}",
+              "{1; 2; 3; 4; 6; 9; 12; 18; 36; 37}",
+              "{1; 2; 3; 4; 6; 9; 12; 18; 36}",
+              "{1; 2; 3; 4; 6; 9; 12; 18}"
+            ],
+            "correctIndex": 2,
+            "explanation": "Lần lượt kiểm tra các số từ 1 đến 36 chia hết cho 36, ta được U(36) = {1; 2; 3; 4; 6; 9; 12; 18; 36}."
+          },
+          {
+            "question": "Tìm tập hợp các ước của số 20.",
+            "options": [
+              "{2; 4; 5; 10; 20}",
+              "{1; 2; 4; 5; 10; 20}",
+              "{1; 2; 4; 5; 10}",
+              "{1; 2; 4; 5; 10; 20; 21}"
+            ],
+            "correctIndex": 1,
+            "explanation": "Lần lượt kiểm tra các số từ 1 đến 20 chia hết cho 20, ta được U(20) = {1; 2; 4; 5; 10; 20}."
+          },
+          {
+            "question": "Tìm tập hợp các ước của số 32.",
+            "options": [
+              "{1; 2; 4; 8; 16; 32; 33}",
+              "{1; 2; 4; 8; 16; 32}",
+              "{1; 2; 4; 8; 16}",
+              "{2; 4; 8; 16; 32}"
+            ],
+            "correctIndex": 1,
+            "explanation": "Lần lượt kiểm tra các số từ 1 đến 32 chia hết cho 32, ta được U(32) = {1; 2; 4; 8; 16; 32}."
+          },
+          {
+            "question": "Tìm tập hợp các ước của số 28.",
+            "options": [
+              "{1; 2; 4; 7; 14}",
+              "{2; 4; 7; 14; 28}",
+              "{1; 2; 4; 7; 14; 28}",
+              "{1; 2; 4; 7; 14; 28; 29}"
+            ],
+            "correctIndex": 2,
+            "explanation": "Lần lượt kiểm tra các số từ 1 đến 28 chia hết cho 28, ta được U(28) = {1; 2; 4; 7; 14; 28}."
+          },
+          {
+            "question": "Liệt kê 5 bội đầu tiên (kể cả 0) của số 6.",
+            "options": [
+              "{0; 6; 12; 18; 24}",
+              "{6; 7; 8; 9; 10}",
+              "{6; 12; 18; 24; 30}",
+              "{0; 6; 12; 18; 30}"
+            ],
+            "correctIndex": 0,
+            "explanation": "Nhân 6 lần lượt với 0, 1, 2,... ta được các bội của 6 là B(6) = {0; 6; 12; 18; 24} (lấy 5 phần tử đầu tiên)."
+          },
+          {
+            "question": "Liệt kê 6 bội đầu tiên (kể cả 0) của số 7.",
+            "options": [
+              "{7; 8; 9; 10; 11; 12}",
+              "{0; 7; 14; 21; 28; 35}",
+              "{0; 7; 14; 21; 28; 42}",
+              "{7; 14; 21; 28; 35; 42}"
+            ],
+            "correctIndex": 1,
+            "explanation": "Nhân 7 lần lượt với 0, 1, 2,... ta được các bội của 7 là B(7) = {0; 7; 14; 21; 28; 35} (lấy 6 phần tử đầu tiên)."
+          },
+          {
+            "question": "Liệt kê 4 bội đầu tiên (kể cả 0) của số 9.",
+            "options": [
+              "{0; 9; 18; 36}",
+              "{9; 10; 11; 12}",
+              "{0; 9; 18; 27}",
+              "{9; 18; 27; 36}"
+            ],
+            "correctIndex": 2,
+            "explanation": "Nhân 9 lần lượt với 0, 1, 2,... ta được các bội của 9 là B(9) = {0; 9; 18; 27} (lấy 4 phần tử đầu tiên)."
+          },
+          {
+            "question": "Liệt kê 5 bội đầu tiên (kể cả 0) của số 11.",
+            "options": [
+              "{11; 22; 33; 44; 55}",
+              "{0; 11; 22; 33; 44}",
+              "{0; 11; 22; 33; 55}",
+              "{11; 12; 13; 14; 15}"
+            ],
+            "correctIndex": 1,
+            "explanation": "Nhân 11 lần lượt với 0, 1, 2,... ta được các bội của 11 là B(11) = {0; 11; 22; 33; 44} (lấy 5 phần tử đầu tiên)."
+          },
+          {
+            "question": "Không tính tổng, hãy xét xem A = 12 + 18 + 30 có chia hết cho 6 không?",
+            "options": [
+              "Chia hết cho 7",
+              "Không thể xác định nếu không tính tổng trực tiếp",
+              "Không chia hết cho 6",
+              "Chia hết cho 6, vì tất cả các số hạng đều chia hết cho 6"
+            ],
+            "correctIndex": 3,
+            "explanation": "Kiểm tra từng số hạng chia cho 6: 12 chia hết, 18 chia hết, 30 chia hết cho 6. Do đó Chia hết cho 6, vì tất cả các số hạng đều chia hết cho 6."
+          },
+          {
+            "question": "Không tính tổng, hãy xét xem A = 15 + 20 + 9 có chia hết cho 5 không?",
+            "options": [
+              "Không thể xác định nếu không tính tổng trực tiếp",
+              "Chia hết cho 5",
+              "Chia hết cho 6",
+              "Không chia hết cho 5, vì có số hạng không chia hết cho 5"
+            ],
+            "correctIndex": 3,
+            "explanation": "Kiểm tra từng số hạng chia cho 5: 15 chia hết, 20 chia hết, 9 không chia hết cho 5. Do đó Không chia hết cho 5, vì có số hạng không chia hết cho 5."
+          },
+          {
+            "question": "Không tính tổng, hãy xét xem A = 21 + 14 + 35 có chia hết cho 7 không?",
+            "options": [
+              "Không chia hết cho 7",
+              "Không thể xác định nếu không tính tổng trực tiếp",
+              "Chia hết cho 8",
+              "Chia hết cho 7, vì tất cả các số hạng đều chia hết cho 7"
+            ],
+            "correctIndex": 3,
+            "explanation": "Kiểm tra từng số hạng chia cho 7: 21 chia hết, 14 chia hết, 35 chia hết cho 7. Do đó Chia hết cho 7, vì tất cả các số hạng đều chia hết cho 7."
+          },
+          {
+            "question": "Không tính tổng, hãy xét xem A = 16 + 24 + 10 có chia hết cho 4 không?",
+            "options": [
+              "Không thể xác định nếu không tính tổng trực tiếp",
+              "Chia hết cho 5",
+              "Chia hết cho 4",
+              "Không chia hết cho 4, vì có số hạng không chia hết cho 4"
+            ],
+            "correctIndex": 3,
+            "explanation": "Kiểm tra từng số hạng chia cho 4: 16 chia hết, 24 chia hết, 10 không chia hết cho 4. Do đó Không chia hết cho 4, vì có số hạng không chia hết cho 4."
+          },
+          {
+            "question": "Nếu a chia hết cho b, ta nói a là gì của b?",
+            "options": [
+              "Ước của b",
+              "Bội của b",
+              "Số nguyên tố của b",
+              "Số đối của b"
+            ],
+            "correctIndex": 1,
+            "explanation": "Nếu a chia hết cho b thì a được gọi là bội của b, còn b được gọi là ước của a."
+          },
+          {
+            "question": "Số 0 là bội của mọi số tự nhiên khác 0. Khẳng định này đúng hay sai?",
+            "options": [
+              "Đúng, vì 0 chia cho số nào (khác 0) cũng bằng 0",
+              "Sai, vì 0 không chia hết cho số nào",
+              "Sai, chỉ đúng với số chẵn",
+              "Không xác định được"
+            ],
+            "correctIndex": 0,
+            "explanation": "Vì 0 : b = 0 với mọi b khác 0 (thương là số tự nhiên, không dư), nên 0 chia hết cho mọi số tự nhiên khác 0, tức 0 là bội của mọi số đó."
+          },
+          {
+            "question": "Số 1 là ước của số tự nhiên nào?",
+            "options": [
+              "Chỉ là ước của các số lẻ",
+              "Là ước của mọi số tự nhiên",
+              "Chỉ là ước của chính số 1",
+              "Không là ước của số nào"
+            ],
+            "correctIndex": 1,
+            "explanation": "Vì mọi số tự nhiên a đều có a = 1 × a, nên số 1 là ước của mọi số tự nhiên."
+          },
+          {
+            "question": "Cách tìm bội của một số tự nhiên b (b ≠ 0) được thực hiện như thế nào?",
+            "options": [
+              "Chia b cho các số tự nhiên từ 1 đến b",
+              "Nhân b lần lượt với 0, 1, 2, 3, ...",
+              "Cộng b với 1",
+              "Trừ b cho 1"
+            ],
+            "correctIndex": 1,
+            "explanation": "Muốn tìm bội của b, ta nhân b lần lượt với 0, 1, 2, 3, ... để được các bội của b."
           }
         ]
       },
@@ -422,6 +2010,204 @@ $$\\text{Trong ngoặc tròn } (\\quad) \\rightarrow \\text{Trong ngoặc vuông
             ],
             correctIndex: 3,
             explanation: "Tổng các chữ số là 1 + 5 + * = 6 + *. Để chia hết cho 3, tổng này phải là 6, 9, 12, 15... nghĩa là * có thể là 0, 3, 6, 9. Nếu * = 3, số là 153 có tổng bằng 9 chia hết cho 9 (loại). Nếu * = 9, số là 159 có tổng bằng 15 chia hết cho 3 nhưng không chia hết cho 9 (đúng). Nếu * = 0 hoặc * = 6 thì tổng lần loạt là 6 và 12 đều chia hết cho 3 và không chia hết cho 9."
+          },
+          {
+            "question": "Số 3540 chia hết cho những số nào trong các số 2, 3, 5, 9?",
+            "options": [
+              "{2; 3; 5}",
+              "{2; 3}",
+              "{2; 5}",
+              "{3; 5}"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số 3540 có chữ số tận cùng là 0 nên chia hết cho 2, chia hết cho 5. Tổng các chữ số là 12, chia hết cho 3 nhưng không chia hết cho 9. Vậy 3540 chia hết cho {2; 3; 5}."
+          },
+          {
+            "question": "Số 2718 chia hết cho những số nào trong các số 2, 3, 5, 9?",
+            "options": [
+              "{2; 3; 9}",
+              "{2; 3; 5; 9}",
+              "{3; 9}",
+              "{2; 9}"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số 2718 có chữ số tận cùng là 8 nên chia hết cho 2, không chia hết cho 5. Tổng các chữ số là 18, chia hết cho 9 (nên cũng chia hết cho 3). Vậy 2718 chia hết cho {2; 3; 9}."
+          },
+          {
+            "question": "Số 94125 chia hết cho những số nào trong các số 2, 3, 5, 9?",
+            "options": [
+              "{3; 5}",
+              "{5}",
+              "{3}",
+              "{2; 3; 5}"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số 94125 có chữ số tận cùng là 5 nên không chia hết cho 2, chia hết cho 5. Tổng các chữ số là 21, chia hết cho 3 nhưng không chia hết cho 9. Vậy 94125 chia hết cho {3; 5}."
+          },
+          {
+            "question": "Số 61230 chia hết cho những số nào trong các số 2, 3, 5, 9?",
+            "options": [
+              "{2; 3; 5; 9}",
+              "{2; 5; 9}",
+              "{2; 3; 9}",
+              "{3; 5; 9}"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số 61230 có chữ số tận cùng là 0 nên chia hết cho 2, chia hết cho 5. Tổng các chữ số là 12, chia hết cho 3 nhưng không chia hết cho 9. Vậy 61230 chia hết cho {2; 3; 5; 9}."
+          },
+          {
+            "question": "Số 48651 chia hết cho những số nào trong các số 2, 3, 5, 9?",
+            "options": [
+              "{2; 3}",
+              "{3}",
+              "{3; 5}",
+              "Không chia hết cho số nào trong 4 số trên"
+            ],
+            "correctIndex": 1,
+            "explanation": "Số 48651 có chữ số tận cùng là 1 nên không chia hết cho 2, không chia hết cho 5. Tổng các chữ số là 24, chia hết cho 3 nhưng không chia hết cho 9. Vậy 48651 chia hết cho {3}."
+          },
+          {
+            "question": "Số 72360 chia hết cho những số nào trong các số 2, 3, 5, 9?",
+            "options": [
+              "{2; 3; 5; 9}",
+              "{2; 5; 9}",
+              "{2; 3; 9}",
+              "{3; 5; 9}"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số 72360 có chữ số tận cùng là 0 nên chia hết cho 2, chia hết cho 5. Tổng các chữ số là 18, chia hết cho 9 (nên cũng chia hết cho 3). Vậy 72360 chia hết cho {2; 3; 5; 9}."
+          },
+          {
+            "question": "Số 18475 chia hết cho những số nào trong các số 2, 3, 5, 9?",
+            "options": [
+              "{2; 5}",
+              "{3; 5}",
+              "{5}",
+              "Không chia hết cho số nào trong 4 số trên"
+            ],
+            "correctIndex": 2,
+            "explanation": "Số 18475 có chữ số tận cùng là 5 nên không chia hết cho 2, chia hết cho 5. Tổng các chữ số là 25, không chia hết cho 3 và 9. Vậy 18475 chia hết cho {5}."
+          },
+          {
+            "question": "Số 39024 chia hết cho những số nào trong các số 2, 3, 5, 9?",
+            "options": [
+              "{2; 3}",
+              "{2}",
+              "{2; 3; 5}",
+              "{3}"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số 39024 có chữ số tận cùng là 4 nên chia hết cho 2, không chia hết cho 5. Tổng các chữ số là 18, chia hết cho 9 (nên cũng chia hết cho 3). Vậy 39024 chia hết cho {2; 3}."
+          },
+          {
+            "question": "Tìm chữ số * để số 7*2 chia hết cho 3.",
+            "options": [
+              "Không có giá trị nào thỏa mãn",
+              "* = 0",
+              "* = 2",
+              "* = 0, * = 3, * = 6, * = 9"
+            ],
+            "correctIndex": 3,
+            "explanation": "Áp dụng dấu hiệu chia hết cho 3, ta tìm được các giá trị * thỏa mãn là: * = 0, * = 3, * = 6, * = 9."
+          },
+          {
+            "question": "Tìm chữ số * để số 4*35 chia hết cho 9.",
+            "options": [
+              "* = 7",
+              "* = 8",
+              "* = 6",
+              "Không có giá trị nào thỏa mãn"
+            ],
+            "correctIndex": 2,
+            "explanation": "Áp dụng dấu hiệu chia hết cho 9, ta tìm được các giá trị * thỏa mãn là: * = 6."
+          },
+          {
+            "question": "Tìm chữ số * để số 28* chia hết cho 5.",
+            "options": [
+              "* = 0",
+              "Không có giá trị nào thỏa mãn",
+              "* = 0, * = 5",
+              "* = 2"
+            ],
+            "correctIndex": 2,
+            "explanation": "Áp dụng dấu hiệu chia hết cho 5, ta tìm được các giá trị * thỏa mãn là: * = 0, * = 5."
+          },
+          {
+            "question": "Tìm chữ số * để số 6*4 chia hết cho 3.",
+            "options": [
+              "* = 2, * = 5, * = 8",
+              "Không có giá trị nào thỏa mãn",
+              "* = 2",
+              "* = 4"
+            ],
+            "correctIndex": 0,
+            "explanation": "Áp dụng dấu hiệu chia hết cho 3, ta tìm được các giá trị * thỏa mãn là: * = 2, * = 5, * = 8."
+          },
+          {
+            "question": "Số nào sau đây chia hết cho 5 nhưng không chia hết cho 2?",
+            "options": [
+              "120",
+              "245",
+              "350",
+              "480"
+            ],
+            "correctIndex": 1,
+            "explanation": "Số chia hết cho 5 có chữ số tận cùng 0 hoặc 5. Số chia hết cho 2 phải có chữ số tận cùng chẵn. Số 245 tận cùng là 5 (chia hết cho 5) nhưng là số lẻ nên không chia hết cho 2."
+          },
+          {
+            "question": "Một số chia hết cho 9 thì có chắc chắn chia hết cho 3 không?",
+            "options": [
+              "Có, vì 9 chia hết cho 3 nên số chia hết cho 9 luôn chia hết cho 3",
+              "Không, hai dấu hiệu này độc lập nhau",
+              "Chỉ đúng với số chẵn",
+              "Chỉ đúng với số có 3 chữ số"
+            ],
+            "correctIndex": 0,
+            "explanation": "Vì 9 = 3 × 3, nếu tổng các chữ số chia hết cho 9 thì chắc chắn tổng đó cũng chia hết cho 3. Do đó số chia hết cho 9 luôn chia hết cho 3."
+          },
+          {
+            "question": "Số 1 000 000 có chia hết cho 3 không?",
+            "options": [
+              "Có, vì số này rất lớn",
+              "Không, vì tổng các chữ số là 1, không chia hết cho 3",
+              "Có, vì tận cùng là số 0",
+              "Không đủ dữ kiện để xác định"
+            ],
+            "correctIndex": 1,
+            "explanation": "Tổng các chữ số của 1 000 000 là 1 + 0+0+0+0+0+0 = 1. Vì 1 không chia hết cho 3 nên số 1 000 000 không chia hết cho 3."
+          },
+          {
+            "question": "Dấu hiệu nhận biết một số chia hết cho 9 dựa vào yếu tố nào của số đó?",
+            "options": [
+              "Chữ số tận cùng",
+              "Tổng các chữ số",
+              "Số lượng chữ số",
+              "Chữ số đầu tiên"
+            ],
+            "correctIndex": 1,
+            "explanation": "Một số chia hết cho 9 khi và chỉ khi tổng các chữ số của số đó chia hết cho 9."
+          },
+          {
+            "question": "Số 2 340 có chia hết cho cả 2 và 9 hay không?",
+            "options": [
+              "Chia hết cho 2 nhưng không chia hết cho 9",
+              "Chia hết cho cả 2 và 9",
+              "Không chia hết cho cả 2 và 9",
+              "Chia hết cho 9 nhưng không chia hết cho 2"
+            ],
+            "correctIndex": 1,
+            "explanation": "Số 2 340 tận cùng là 0 (chữ số chẵn) nên chia hết cho 2. Tổng các chữ số 2+3+4+0 = 9 chia hết cho 9, nên số này cũng chia hết cho 9."
+          },
+          {
+            "question": "Trong hai dấu hiệu chia hết cho 2 và chia hết cho 5, điểm chung là gì?",
+            "options": [
+              "Đều dựa vào tổng các chữ số",
+              "Đều chỉ xét chữ số tận cùng của số đó",
+              "Đều chỉ áp dụng cho số chẵn",
+              "Không có điểm chung nào"
+            ],
+            "correctIndex": 1,
+            "explanation": "Cả hai dấu hiệu chia hết cho 2 và cho 5 đều chỉ cần xét chữ số tận cùng của số tự nhiên đó, không cần xét các chữ số khác."
           }
         ]
       },
@@ -463,6 +2249,204 @@ $$\\text{Trong ngoặc tròn } (\\quad) \\rightarrow \\text{Trong ngoặc vuông
             ],
             correctIndex: 2,
             explanation: "Ta chia 60 : 2 = 30; 30 : 2 = 15; 15 : 3 = 5; 5 : 5 = 1. Kết quả tích lũy là 2 * 2 * 3 * 5 = 2^2 * 3 * 5. Các đáp án khác chứa hợp số 10 hoặc 4."
+          },
+          {
+            "question": "Số 23 là số nguyên tố hay hợp số?",
+            "options": [
+              "23 là hợp số",
+              "23 không phải số nguyên tố cũng không phải hợp số",
+              "23 là số nguyên tố",
+              "23 vừa là số nguyên tố vừa là hợp số"
+            ],
+            "correctIndex": 2,
+            "explanation": "Kiểm tra các ước của 23: 23 là số nguyên tố."
+          },
+          {
+            "question": "Số 27 là số nguyên tố hay hợp số?",
+            "options": [
+              "27 không phải số nguyên tố cũng không phải hợp số",
+              "27 là hợp số",
+              "27 là số nguyên tố",
+              "27 vừa là số nguyên tố vừa là hợp số"
+            ],
+            "correctIndex": 1,
+            "explanation": "Kiểm tra các ước của 27: 27 là hợp số (ví dụ 27 chia hết cho 3)."
+          },
+          {
+            "question": "Số 31 là số nguyên tố hay hợp số?",
+            "options": [
+              "31 vừa là số nguyên tố vừa là hợp số",
+              "31 là số nguyên tố",
+              "31 là hợp số",
+              "31 không phải số nguyên tố cũng không phải hợp số"
+            ],
+            "correctIndex": 1,
+            "explanation": "Kiểm tra các ước của 31: 31 là số nguyên tố."
+          },
+          {
+            "question": "Số 51 là số nguyên tố hay hợp số?",
+            "options": [
+              "51 không phải số nguyên tố cũng không phải hợp số",
+              "51 là hợp số",
+              "51 là số nguyên tố",
+              "51 vừa là số nguyên tố vừa là hợp số"
+            ],
+            "correctIndex": 1,
+            "explanation": "Kiểm tra các ước của 51: 51 là hợp số (ví dụ 51 chia hết cho 3)."
+          },
+          {
+            "question": "Số 41 là số nguyên tố hay hợp số?",
+            "options": [
+              "41 không phải số nguyên tố cũng không phải hợp số",
+              "41 là số nguyên tố",
+              "41 là hợp số",
+              "41 vừa là số nguyên tố vừa là hợp số"
+            ],
+            "correctIndex": 1,
+            "explanation": "Kiểm tra các ước của 41: 41 là số nguyên tố."
+          },
+          {
+            "question": "Số 57 là số nguyên tố hay hợp số?",
+            "options": [
+              "57 vừa là số nguyên tố vừa là hợp số",
+              "57 là hợp số",
+              "57 là số nguyên tố",
+              "57 không phải số nguyên tố cũng không phải hợp số"
+            ],
+            "correctIndex": 1,
+            "explanation": "Kiểm tra các ước của 57: 57 là hợp số (ví dụ 57 chia hết cho 3)."
+          },
+          {
+            "question": "Số 61 là số nguyên tố hay hợp số?",
+            "options": [
+              "61 là số nguyên tố",
+              "61 là hợp số",
+              "61 không phải số nguyên tố cũng không phải hợp số",
+              "61 vừa là số nguyên tố vừa là hợp số"
+            ],
+            "correctIndex": 0,
+            "explanation": "Kiểm tra các ước của 61: 61 là số nguyên tố."
+          },
+          {
+            "question": "Số 91 là số nguyên tố hay hợp số?",
+            "options": [
+              "91 là số nguyên tố",
+              "91 vừa là số nguyên tố vừa là hợp số",
+              "91 không phải số nguyên tố cũng không phải hợp số",
+              "91 là hợp số"
+            ],
+            "correctIndex": 3,
+            "explanation": "Kiểm tra các ước của 91: 91 là hợp số (ví dụ 91 chia hết cho 7)."
+          },
+          {
+            "question": "Phân tích số 48 ra thừa số nguyên tố.",
+            "options": [
+              "2^5 * 3",
+              "2 × 24",
+              "2 * 3",
+              "2^4 * 3"
+            ],
+            "correctIndex": 3,
+            "explanation": "Phân tích 48 ra thừa số nguyên tố ta được: 48 = 2^4 * 3."
+          },
+          {
+            "question": "Phân tích số 90 ra thừa số nguyên tố.",
+            "options": [
+              "2 * 3 * 5",
+              "2^2 * 3^2 * 5",
+              "2 * 3^2 * 5",
+              "2 × 45"
+            ],
+            "correctIndex": 2,
+            "explanation": "Phân tích 90 ra thừa số nguyên tố ta được: 90 = 2 * 3^2 * 5."
+          },
+          {
+            "question": "Phân tích số 72 ra thừa số nguyên tố.",
+            "options": [
+              "2^3 * 3^2",
+              "2^3 * 3",
+              "2^4 * 3^2",
+              "2 × 36"
+            ],
+            "correctIndex": 0,
+            "explanation": "Phân tích 72 ra thừa số nguyên tố ta được: 72 = 2^3 * 3^2."
+          },
+          {
+            "question": "Phân tích số 84 ra thừa số nguyên tố.",
+            "options": [
+              "2^3 * 3 * 7",
+              "2 * 3 * 7",
+              "2^2 * 3 * 7",
+              "2 × 42"
+            ],
+            "correctIndex": 2,
+            "explanation": "Phân tích 84 ra thừa số nguyên tố ta được: 84 = 2^2 * 3 * 7."
+          },
+          {
+            "question": "Phân tích số 126 ra thừa số nguyên tố.",
+            "options": [
+              "2 * 3 * 7",
+              "2 × 63",
+              "2^2 * 3^2 * 7",
+              "2 * 3^2 * 7"
+            ],
+            "correctIndex": 3,
+            "explanation": "Phân tích 126 ra thừa số nguyên tố ta được: 126 = 2 * 3^2 * 7."
+          },
+          {
+            "question": "Phân tích số 100 ra thừa số nguyên tố.",
+            "options": [
+              "2^3 * 5^2",
+              "2^2 * 5^2",
+              "2^2 * 5",
+              "2 × 50"
+            ],
+            "correctIndex": 1,
+            "explanation": "Phân tích 100 ra thừa số nguyên tố ta được: 100 = 2^2 * 5^2."
+          },
+          {
+            "question": "Số nguyên tố nhỏ nhất là số nào?",
+            "options": [
+              "0",
+              "1",
+              "2",
+              "3"
+            ],
+            "correctIndex": 2,
+            "explanation": "Số nguyên tố là số tự nhiên lớn hơn 1 chỉ có đúng hai ước là 1 và chính nó. Số nguyên tố nhỏ nhất là 2."
+          },
+          {
+            "question": "Trong các số 0 và 1, khẳng định nào sau đây đúng?",
+            "options": [
+              "0 và 1 đều là số nguyên tố",
+              "0 và 1 đều là hợp số",
+              "0 và 1 không phải là số nguyên tố cũng không phải là hợp số",
+              "0 là số nguyên tố, 1 là hợp số"
+            ],
+            "correctIndex": 2,
+            "explanation": "Theo định nghĩa, số nguyên tố và hợp số đều phải lớn hơn 1. Do đó 0 và 1 không thuộc loại nào trong hai loại này."
+          },
+          {
+            "question": "Số các ước của một hợp số so với số các ước của một số nguyên tố như thế nào?",
+            "options": [
+              "Hợp số luôn có nhiều hơn 2 ước, số nguyên tố có đúng 2 ước",
+              "Cả hai đều có đúng 2 ước",
+              "Hợp số có ít ước hơn số nguyên tố",
+              "Không thể so sánh"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số nguyên tố có đúng 2 ước (1 và chính nó), trong khi hợp số có nhiều hơn 2 ước."
+          },
+          {
+            "question": "Cách phân tích ra thừa số nguyên tố bằng 'sơ đồ cột' thực hiện như thế nào?",
+            "options": [
+              "Chia số đó lần lượt cho các số nguyên tố nhỏ nhất có thể, đến khi thương bằng 1",
+              "Cộng dồn các số nguyên tố nhỏ hơn số đó",
+              "Nhân số đó với các số nguyên tố nhỏ hơn nó",
+              "Lấy số đó trừ đi số nguyên tố lớn nhất nhỏ hơn nó"
+            ],
+            "correctIndex": 0,
+            "explanation": "Sơ đồ cột: ta chia số cần phân tích cho số nguyên tố nhỏ nhất mà nó chia hết, ghi thương xuống dưới, tiếp tục quá trình cho đến khi thương bằng 1."
           }
         ]
       },
@@ -506,6 +2490,204 @@ $$\\text{Trong ngoặc tròn } (\\quad) \\rightarrow \\text{Trong ngoặc vuông
             ],
             correctIndex: 1,
             explanation: "ƯCLN(24, 36) = 12. Chia cả tử và mẫu cho 12 ta được: (24 : 12) / (36 : 12) = 2/3."
+          },
+          {
+            "question": "Tìm ƯCLN của hai số 24 và 36.",
+            "options": [
+              "14",
+              "12",
+              "6",
+              "24"
+            ],
+            "correctIndex": 1,
+            "explanation": "Phân tích 24 = 2^3 * 3; 36 = 2^2 * 3^2. Tích các thừa số chung với số mũ nhỏ nhất cho ta ƯCLN(24, 36) = 12."
+          },
+          {
+            "question": "Tìm ƯCLN của hai số 45 và 60.",
+            "options": [
+              "16",
+              "30",
+              "17",
+              "15"
+            ],
+            "correctIndex": 3,
+            "explanation": "Phân tích 45 = 3^2 * 5; 60 = 2^2 * 3 * 5. Tích các thừa số chung với số mũ nhỏ nhất cho ta ƯCLN(45, 60) = 15."
+          },
+          {
+            "question": "Tìm ƯCLN của hai số 28 và 42.",
+            "options": [
+              "14",
+              "16",
+              "7",
+              "28"
+            ],
+            "correctIndex": 0,
+            "explanation": "Phân tích 28 = 2^2 * 7; 42 = 2 * 3 * 7. Tích các thừa số chung với số mũ nhỏ nhất cho ta ƯCLN(28, 42) = 14."
+          },
+          {
+            "question": "Tìm ƯCLN của hai số 56 và 84.",
+            "options": [
+              "14",
+              "56",
+              "28",
+              "30"
+            ],
+            "correctIndex": 2,
+            "explanation": "Phân tích 56 = 2^3 * 7; 84 = 2^2 * 3 * 7. Tích các thừa số chung với số mũ nhỏ nhất cho ta ƯCLN(56, 84) = 28."
+          },
+          {
+            "question": "Tìm ƯCLN của hai số 63 và 105.",
+            "options": [
+              "42",
+              "21",
+              "23",
+              "22"
+            ],
+            "correctIndex": 1,
+            "explanation": "Phân tích 63 = 3^2 * 7; 105 = 3 * 5 * 7. Tích các thừa số chung với số mũ nhỏ nhất cho ta ƯCLN(63, 105) = 21."
+          },
+          {
+            "question": "Tìm ƯCLN của hai số 18 và 27.",
+            "options": [
+              "9",
+              "18",
+              "10",
+              "11"
+            ],
+            "correctIndex": 0,
+            "explanation": "Phân tích 18 = 2 * 3^2; 27 = 3^3. Tích các thừa số chung với số mũ nhỏ nhất cho ta ƯCLN(18, 27) = 9."
+          },
+          {
+            "question": "Rút gọn phân số 18/24 về phân số tối giản.",
+            "options": [
+              "18/24",
+              "4/4",
+              "9/12",
+              "3/4"
+            ],
+            "correctIndex": 3,
+            "explanation": "ƯCLN(18, 24) = 6. Chia cả tử và mẫu cho 6: (18:6)/(24:6) = 3/4."
+          },
+          {
+            "question": "Rút gọn phân số 36/48 về phân số tối giản.",
+            "options": [
+              "36/48",
+              "4/4",
+              "3/4",
+              "18/24"
+            ],
+            "correctIndex": 2,
+            "explanation": "ƯCLN(36, 48) = 12. Chia cả tử và mẫu cho 12: (36:12)/(48:12) = 3/4."
+          },
+          {
+            "question": "Rút gọn phân số 45/60 về phân số tối giản.",
+            "options": [
+              "45/60",
+              "3/4",
+              "4/4",
+              "22/30"
+            ],
+            "correctIndex": 1,
+            "explanation": "ƯCLN(45, 60) = 15. Chia cả tử và mẫu cho 15: (45:15)/(60:15) = 3/4."
+          },
+          {
+            "question": "Rút gọn phân số 28/70 về phân số tối giản.",
+            "options": [
+              "14/35",
+              "28/70",
+              "2/5",
+              "3/5"
+            ],
+            "correctIndex": 2,
+            "explanation": "ƯCLN(28, 70) = 14. Chia cả tử và mẫu cho 14: (28:14)/(70:14) = 2/5."
+          },
+          {
+            "question": "Hai số 8 và 15 có phải là hai số nguyên tố cùng nhau không?",
+            "options": [
+              "Không, vì ƯCLN(8, 15) = 15",
+              "Có, vì ƯCLN(8, 15) = 8",
+              "Không, vì ƯCLN(8, 15) = 1 ≠ 1",
+              "Có, vì ƯCLN(8, 15) = 1"
+            ],
+            "correctIndex": 3,
+            "explanation": "Tính ƯCLN(8, 15) = 1. Có, vì ƯCLN(8, 15) = 1."
+          },
+          {
+            "question": "Hai số 9 và 12 có phải là hai số nguyên tố cùng nhau không?",
+            "options": [
+              "Không, vì ƯCLN(9, 12) = 3 ≠ 1",
+              "Không, vì ƯCLN(9, 12) = 12",
+              "Có, vì ƯCLN(9, 12) = 1",
+              "Có, vì ƯCLN(9, 12) = 9"
+            ],
+            "correctIndex": 0,
+            "explanation": "Tính ƯCLN(9, 12) = 3. Không, vì ƯCLN(9, 12) = 3 ≠ 1."
+          },
+          {
+            "question": "Hai số 14 và 25 có phải là hai số nguyên tố cùng nhau không?",
+            "options": [
+              "Có, vì ƯCLN(14, 25) = 14",
+              "Không, vì ƯCLN(14, 25) = 1 ≠ 1",
+              "Không, vì ƯCLN(14, 25) = 25",
+              "Có, vì ƯCLN(14, 25) = 1"
+            ],
+            "correctIndex": 3,
+            "explanation": "Tính ƯCLN(14, 25) = 1. Có, vì ƯCLN(14, 25) = 1."
+          },
+          {
+            "question": "Hai số 16 và 20 có phải là hai số nguyên tố cùng nhau không?",
+            "options": [
+              "Không, vì ƯCLN(16, 20) = 4 ≠ 1",
+              "Có, vì ƯCLN(16, 20) = 1",
+              "Có, vì ƯCLN(16, 20) = 16",
+              "Không, vì ƯCLN(16, 20) = 20"
+            ],
+            "correctIndex": 0,
+            "explanation": "Tính ƯCLN(16, 20) = 4. Không, vì ƯCLN(16, 20) = 4 ≠ 1."
+          },
+          {
+            "question": "ƯCLN của một số a với chính số a bằng bao nhiêu?",
+            "options": [
+              "1",
+              "0",
+              "a",
+              "Không xác định"
+            ],
+            "correctIndex": 2,
+            "explanation": "Vì a là ước lớn nhất của chính nó, nên ƯCLN(a, a) = a."
+          },
+          {
+            "question": "Bước đầu tiên trong quy tắc tìm ƯCLN bằng phân tích thừa số nguyên tố là gì?",
+            "options": [
+              "Chọn thừa số nguyên tố chung",
+              "Phân tích mỗi số ra thừa số nguyên tố",
+              "Lập tích các thừa số với số mũ lớn nhất",
+              "Cộng các số lại với nhau"
+            ],
+            "correctIndex": 1,
+            "explanation": "Quy tắc tìm ƯCLN gồm 3 bước, bước đầu tiên là phân tích mỗi số ra thừa số nguyên tố."
+          },
+          {
+            "question": "Khi tìm ƯCLN bằng thừa số nguyên tố, với thừa số chung ta chọn số mũ nào?",
+            "options": [
+              "Số mũ lớn nhất",
+              "Số mũ nhỏ nhất",
+              "Tổng các số mũ",
+              "Hiệu các số mũ"
+            ],
+            "correctIndex": 1,
+            "explanation": "Khi tính ƯCLN, với mỗi thừa số nguyên tố chung, ta chọn số mũ nhỏ nhất của thừa số đó trong các số đã phân tích."
+          },
+          {
+            "question": "ƯCLN(1, b) với b là một số tự nhiên bất kỳ khác 0 bằng bao nhiêu?",
+            "options": [
+              "b",
+              "1",
+              "0",
+              "Không xác định"
+            ],
+            "correctIndex": 1,
+            "explanation": "Vì 1 chỉ có duy nhất một ước là chính nó, nên ước chung lớn nhất của 1 và bất kỳ số nào khác 0 luôn bằng 1."
           }
         ]
       },
@@ -549,6 +2731,204 @@ $$\\text{Trong ngoặc tròn } (\\quad) \\rightarrow \\text{Trong ngoặc vuông
             ],
             correctIndex: 1,
             explanation: "Mẫu số chung nhỏ nhất là BCNN của 6 và 8. Phân tích: 6 = 2 * 3, 8 = 2^3. BCNN(6, 8) = 2^3 * 3 = 24."
+          },
+          {
+            "question": "Tìm BCNN của hai số 4 và 6.",
+            "options": [
+              "12",
+              "8",
+              "24",
+              "16"
+            ],
+            "correctIndex": 0,
+            "explanation": "Phân tích 4 = 2^2; 6 = 2 * 3. Tích các thừa số chung và riêng với số mũ lớn nhất cho ta BCNN(4, 6) = 12."
+          },
+          {
+            "question": "Tìm BCNN của hai số 9 và 12.",
+            "options": [
+              "108",
+              "36",
+              "27",
+              "45"
+            ],
+            "correctIndex": 1,
+            "explanation": "Phân tích 9 = 3^2; 12 = 2^2 * 3. Tích các thừa số chung và riêng với số mũ lớn nhất cho ta BCNN(9, 12) = 36."
+          },
+          {
+            "question": "Tìm BCNN của hai số 10 và 15.",
+            "options": [
+              "150",
+              "20",
+              "40",
+              "30"
+            ],
+            "correctIndex": 3,
+            "explanation": "Phân tích 10 = 2 * 5; 15 = 3 * 5. Tích các thừa số chung và riêng với số mũ lớn nhất cho ta BCNN(10, 15) = 30."
+          },
+          {
+            "question": "Tìm BCNN của hai số 6 và 8.",
+            "options": [
+              "24",
+              "48",
+              "18",
+              "30"
+            ],
+            "correctIndex": 0,
+            "explanation": "Phân tích 6 = 2 * 3; 8 = 2^3. Tích các thừa số chung và riêng với số mũ lớn nhất cho ta BCNN(6, 8) = 24."
+          },
+          {
+            "question": "Tìm BCNN của hai số 14 và 21.",
+            "options": [
+              "42",
+              "28",
+              "294",
+              "56"
+            ],
+            "correctIndex": 0,
+            "explanation": "Phân tích 14 = 2 * 7; 21 = 3 * 7. Tích các thừa số chung và riêng với số mũ lớn nhất cho ta BCNN(14, 21) = 42."
+          },
+          {
+            "question": "Tìm BCNN của hai số 15 và 20.",
+            "options": [
+              "300",
+              "75",
+              "45",
+              "60"
+            ],
+            "correctIndex": 3,
+            "explanation": "Phân tích 15 = 3 * 5; 20 = 2^2 * 5. Tích các thừa số chung và riêng với số mũ lớn nhất cho ta BCNN(15, 20) = 60."
+          },
+          {
+            "question": "Muốn quy đồng mẫu số của hai phân số có mẫu là 4 và 6, mẫu số chung nhỏ nhất nên chọn là bao nhiêu?",
+            "options": [
+              "12",
+              "16",
+              "24",
+              "6"
+            ],
+            "correctIndex": 0,
+            "explanation": "Mẫu số chung nhỏ nhất chính là BCNN(4, 6) = 12."
+          },
+          {
+            "question": "Muốn quy đồng mẫu số của hai phân số có mẫu là 6 và 9, mẫu số chung nhỏ nhất nên chọn là bao nhiêu?",
+            "options": [
+              "9",
+              "18",
+              "54",
+              "24"
+            ],
+            "correctIndex": 1,
+            "explanation": "Mẫu số chung nhỏ nhất chính là BCNN(6, 9) = 18."
+          },
+          {
+            "question": "Muốn quy đồng mẫu số của hai phân số có mẫu là 8 và 12, mẫu số chung nhỏ nhất nên chọn là bao nhiêu?",
+            "options": [
+              "96",
+              "12",
+              "32",
+              "24"
+            ],
+            "correctIndex": 3,
+            "explanation": "Mẫu số chung nhỏ nhất chính là BCNN(8, 12) = 24."
+          },
+          {
+            "question": "Muốn quy đồng mẫu số của hai phân số có mẫu là 5 và 15, mẫu số chung nhỏ nhất nên chọn là bao nhiêu?",
+            "options": [
+              "17",
+              "20",
+              "75",
+              "15"
+            ],
+            "correctIndex": 3,
+            "explanation": "Mẫu số chung nhỏ nhất chính là BCNN(5, 15) = 15."
+          },
+          {
+            "question": "Hai số 3 và 5 là hai số nguyên tố cùng nhau. Tìm BCNN(3, 5).",
+            "options": [
+              "16",
+              "10",
+              "18",
+              "15"
+            ],
+            "correctIndex": 3,
+            "explanation": "Vì 3 và 5 là hai số nguyên tố cùng nhau nên BCNN(3, 5) = 3 × 5 = 15."
+          },
+          {
+            "question": "Hai số 7 và 9 là hai số nguyên tố cùng nhau. Tìm BCNN(7, 9).",
+            "options": [
+              "63",
+              "54",
+              "64",
+              "70"
+            ],
+            "correctIndex": 0,
+            "explanation": "Vì 7 và 9 là hai số nguyên tố cùng nhau nên BCNN(7, 9) = 7 × 9 = 63."
+          },
+          {
+            "question": "Hai số 4 và 9 là hai số nguyên tố cùng nhau. Tìm BCNN(4, 9).",
+            "options": [
+              "36",
+              "40",
+              "37",
+              "27"
+            ],
+            "correctIndex": 0,
+            "explanation": "Vì 4 và 9 là hai số nguyên tố cùng nhau nên BCNN(4, 9) = 4 × 9 = 36."
+          },
+          {
+            "question": "Hai số 5 và 11 là hai số nguyên tố cùng nhau. Tìm BCNN(5, 11).",
+            "options": [
+              "56",
+              "60",
+              "55",
+              "44"
+            ],
+            "correctIndex": 2,
+            "explanation": "Vì 5 và 11 là hai số nguyên tố cùng nhau nên BCNN(5, 11) = 5 × 11 = 55."
+          },
+          {
+            "question": "BCNN của một số a với số 1 bằng bao nhiêu?",
+            "options": [
+              "1",
+              "a",
+              "0",
+              "a + 1"
+            ],
+            "correctIndex": 1,
+            "explanation": "Vì mọi số đều là bội của 1, nên bội chung nhỏ nhất của a và 1 chính là a."
+          },
+          {
+            "question": "Với thừa số nguyên tố chung khi tính BCNN, ta chọn số mũ nào?",
+            "options": [
+              "Số mũ nhỏ nhất",
+              "Số mũ lớn nhất",
+              "Số mũ bằng 1",
+              "Tổng các số mũ"
+            ],
+            "correctIndex": 1,
+            "explanation": "Khi tính BCNN, với mỗi thừa số nguyên tố (chung hoặc riêng), ta chọn số mũ lớn nhất của thừa số đó."
+          },
+          {
+            "question": "So với ƯCLN(a, b), BCNN(a, b) có đặc điểm gì?",
+            "options": [
+              "BCNN luôn nhỏ hơn ƯCLN",
+              "BCNN luôn lớn hơn hoặc bằng ƯCLN",
+              "BCNN luôn bằng ƯCLN",
+              "Không có mối liên hệ nào"
+            ],
+            "correctIndex": 1,
+            "explanation": "Vì ƯCLN là ước chung (thường nhỏ) còn BCNN là bội chung (thường lớn), nên BCNN(a,b) luôn lớn hơn hoặc bằng ƯCLN(a,b)."
+          },
+          {
+            "question": "Bội chung của hai hay nhiều số là gì?",
+            "options": [
+              "Số chia hết cho tất cả các số đó",
+              "Số là ước của tất cả các số đó",
+              "Số lớn nhất trong các số đó",
+              "Số nhỏ nhất trong các số đó"
+            ],
+            "correctIndex": 0,
+            "explanation": "Bội chung của hai hay nhiều số là số chia hết cho tất cả các số đó, tức là bội của tất cả các số đó."
           }
         ]
       },
@@ -595,6 +2975,204 @@ $$\\mathbb{Z} = \\{\\dots; -3; -2; -1; 0; 1; 2; 3; \\dots\\}$$
             ],
             correctIndex: 1,
             explanation: "Hai số đối nhau nằm đối xứng nhau qua điểm gốc 0 trên trục số. Số đối của số âm -15 là số dương 15."
+          },
+          {
+            "question": "Sắp xếp các số nguyên sau theo thứ tự tăng dần: -5, 3, -1, 0, 4.",
+            "options": [
+              "0; -1; 3; 4; -5",
+              "-5; -1; 0; 3; 4",
+              "4; 3; 0; -1; -5",
+              "-1; -5; 0; 3; 4"
+            ],
+            "correctIndex": 1,
+            "explanation": "So sánh các số nguyên trên trục số (số âm càng xa 0 càng nhỏ, số dương càng xa 0 càng lớn), ta được thứ tự tăng dần: -5; -1; 0; 3; 4."
+          },
+          {
+            "question": "Sắp xếp các số nguyên sau theo thứ tự tăng dần: -9, -2, 6, -6, 1.",
+            "options": [
+              "-9; -6; -2; 1; 6",
+              "-6; -9; -2; 1; 6",
+              "6; 1; -2; -6; -9",
+              "1; -2; 6; -6; -9"
+            ],
+            "correctIndex": 0,
+            "explanation": "So sánh các số nguyên trên trục số (số âm càng xa 0 càng nhỏ, số dương càng xa 0 càng lớn), ta được thứ tự tăng dần: -9; -6; -2; 1; 6."
+          },
+          {
+            "question": "Sắp xếp các số nguyên sau theo thứ tự tăng dần: 7, -7, 0, -3, 3.",
+            "options": [
+              "0; -3; 3; 7; -7",
+              "-3; -7; 0; 3; 7",
+              "-7; -3; 0; 3; 7",
+              "7; 3; 0; -3; -7"
+            ],
+            "correctIndex": 2,
+            "explanation": "So sánh các số nguyên trên trục số (số âm càng xa 0 càng nhỏ, số dương càng xa 0 càng lớn), ta được thứ tự tăng dần: -7; -3; 0; 3; 7."
+          },
+          {
+            "question": "Sắp xếp các số nguyên sau theo thứ tự tăng dần: -12, 5, -1, -8, 2.",
+            "options": [
+              "-1; 2; 5; -8; -12",
+              "-12; -8; -1; 2; 5",
+              "5; 2; -1; -8; -12",
+              "-8; -12; -1; 2; 5"
+            ],
+            "correctIndex": 1,
+            "explanation": "So sánh các số nguyên trên trục số (số âm càng xa 0 càng nhỏ, số dương càng xa 0 càng lớn), ta được thứ tự tăng dần: -12; -8; -1; 2; 5."
+          },
+          {
+            "question": "Số đối của số nguyên 23 là số nào?",
+            "options": [
+              "23",
+              "-22",
+              "-24",
+              "-23"
+            ],
+            "correctIndex": 3,
+            "explanation": "Số đối của 23 là số nằm đối xứng với 23 qua điểm 0 trên trục số, tức là -23."
+          },
+          {
+            "question": "Số đối của số nguyên -17 là số nào?",
+            "options": [
+              "16",
+              "-17",
+              "18",
+              "17"
+            ],
+            "correctIndex": 3,
+            "explanation": "Số đối của -17 là số nằm đối xứng với -17 qua điểm 0 trên trục số, tức là 17."
+          },
+          {
+            "question": "Số đối của số nguyên 40 là số nào?",
+            "options": [
+              "-40",
+              "40",
+              "-41",
+              "-39"
+            ],
+            "correctIndex": 0,
+            "explanation": "Số đối của 40 là số nằm đối xứng với 40 qua điểm 0 trên trục số, tức là -40."
+          },
+          {
+            "question": "Số đối của số nguyên -8 là số nào?",
+            "options": [
+              "7",
+              "8",
+              "-8",
+              "9"
+            ],
+            "correctIndex": 1,
+            "explanation": "Số đối của -8 là số nằm đối xứng với -8 qua điểm 0 trên trục số, tức là 8."
+          },
+          {
+            "question": "Số đối của số nguyên 100 là số nào?",
+            "options": [
+              "100",
+              "-100",
+              "-99",
+              "-101"
+            ],
+            "correctIndex": 1,
+            "explanation": "Số đối của 100 là số nằm đối xứng với 100 qua điểm 0 trên trục số, tức là -100."
+          },
+          {
+            "question": "Số đối của số nguyên -1 là số nào?",
+            "options": [
+              "0",
+              "2",
+              "-1",
+              "1"
+            ],
+            "correctIndex": 3,
+            "explanation": "Số đối của -1 là số nằm đối xứng với -1 qua điểm 0 trên trục số, tức là 1."
+          },
+          {
+            "question": "So sánh hai số nguyên -8 và -3.",
+            "options": [
+              "-8 = -3",
+              "Không thể so sánh -8 và -3",
+              "-8 > -3",
+              "-8 < -3"
+            ],
+            "correctIndex": 3,
+            "explanation": "So sánh trên trục số ta có -8 < -3."
+          },
+          {
+            "question": "So sánh hai số nguyên -15 và -15.",
+            "options": [
+              "-15 < -15",
+              "-15 > -15",
+              "Không thể so sánh -15 và -15",
+              "-15 = -15"
+            ],
+            "correctIndex": 3,
+            "explanation": "So sánh trên trục số ta có -15 = -15."
+          },
+          {
+            "question": "So sánh hai số nguyên 6 và -6.",
+            "options": [
+              "Không thể so sánh 6 và -6",
+              "6 < -6",
+              "6 = -6",
+              "6 > -6"
+            ],
+            "correctIndex": 3,
+            "explanation": "So sánh trên trục số ta có 6 > -6."
+          },
+          {
+            "question": "So sánh hai số nguyên -1 và 0.",
+            "options": [
+              "-1 = 0",
+              "-1 < 0",
+              "Không thể so sánh -1 và 0",
+              "-1 > 0"
+            ],
+            "correctIndex": 1,
+            "explanation": "So sánh trên trục số ta có -1 < 0."
+          },
+          {
+            "question": "So sánh hai số nguyên -20 và -19.",
+            "options": [
+              "-20 > -19",
+              "Không thể so sánh -20 và -19",
+              "-20 < -19",
+              "-20 = -19"
+            ],
+            "correctIndex": 2,
+            "explanation": "So sánh trên trục số ta có -20 < -19."
+          },
+          {
+            "question": "Tập hợp số nguyên Z bao gồm những thành phần nào?",
+            "options": [
+              "Chỉ gồm số nguyên dương",
+              "Số nguyên âm, số 0 và số nguyên dương",
+              "Chỉ gồm số nguyên âm và số 0",
+              "Chỉ gồm số tự nhiên"
+            ],
+            "correctIndex": 1,
+            "explanation": "Tập hợp số nguyên Z = {...; -3; -2; -1; 0; 1; 2; 3; ...} gồm các số nguyên âm, số 0 và các số nguyên dương."
+          },
+          {
+            "question": "Mọi số nguyên âm so với số 0 và số nguyên dương như thế nào?",
+            "options": [
+              "Luôn lớn hơn số 0 và mọi số nguyên dương",
+              "Luôn nhỏ hơn số 0 và mọi số nguyên dương",
+              "Có thể lớn hơn hoặc nhỏ hơn tùy trường hợp",
+              "Luôn bằng số 0"
+            ],
+            "correctIndex": 1,
+            "explanation": "Theo quy tắc so sánh số nguyên, mọi số nguyên âm đều nhỏ hơn số 0 và nhỏ hơn mọi số nguyên dương."
+          },
+          {
+            "question": "Với hai số nguyên âm, số nào có số đối lớn hơn thì số đó như thế nào?",
+            "options": [
+              "Lớn hơn",
+              "Nhỏ hơn",
+              "Bằng nhau",
+              "Không so sánh được"
+            ],
+            "correctIndex": 1,
+            "explanation": "Với hai số nguyên âm, số nào có số đối lớn hơn thì số đó nhỏ hơn. Ví dụ -5 < -3 vì số đối của -5 là 5 lớn hơn số đối của -3 là 3."
           }
         ]
       },
@@ -644,6 +3222,204 @@ Khi bỏ dấu ngoặc trong một biểu thức:
             ],
             correctIndex: 1,
             explanation: "Vì đằng trước ngoặc có dấu trừ '-', khi bỏ ngoặc ta phải đổi dấu các số hạng bên trong: 136 (mang dấu + ngầm định) đổi thành -136, -206 đổi thành +206. Vậy A = 794 - 136 + 206."
+          },
+          {
+            "question": "Tính: (-7) + (-9)",
+            "options": [
+              "85",
+              "-14",
+              "16",
+              "-16"
+            ],
+            "correctIndex": 3,
+            "explanation": "Thực hiện phép cộng hai số nguyên: (-7) + (-9) = -16."
+          },
+          {
+            "question": "Tính: (15) + (-8)",
+            "options": [
+              "-7",
+              "7",
+              "23",
+              "9"
+            ],
+            "correctIndex": 1,
+            "explanation": "Thực hiện phép cộng hai số nguyên: (15) + (-8) = 7."
+          },
+          {
+            "question": "Tính: (-23) + (14)",
+            "options": [
+              "9",
+              "-9",
+              "-7",
+              "37"
+            ],
+            "correctIndex": 1,
+            "explanation": "Thực hiện phép cộng hai số nguyên: (-23) + (14) = -9."
+          },
+          {
+            "question": "Tính: (-6) + (-11)",
+            "options": [
+              "-17",
+              "-15",
+              "17",
+              "84"
+            ],
+            "correctIndex": 0,
+            "explanation": "Thực hiện phép cộng hai số nguyên: (-6) + (-11) = -17."
+          },
+          {
+            "question": "Tính: (30) + (-45)",
+            "options": [
+              "-13",
+              "75",
+              "-15",
+              "15"
+            ],
+            "correctIndex": 2,
+            "explanation": "Thực hiện phép cộng hai số nguyên: (30) + (-45) = -15."
+          },
+          {
+            "question": "Tính: (-18) + (25)",
+            "options": [
+              "-7",
+              "43",
+              "9",
+              "7"
+            ],
+            "correctIndex": 3,
+            "explanation": "Thực hiện phép cộng hai số nguyên: (-18) + (25) = 7."
+          },
+          {
+            "question": "Tính: 8 - (-5)",
+            "options": [
+              "-13",
+              "15",
+              "13",
+              "3"
+            ],
+            "correctIndex": 2,
+            "explanation": "Muốn trừ đi một số nguyên, ta cộng với số đối của nó: 8 - (-5) = 8 + (5) = 13."
+          },
+          {
+            "question": "Tính: -14 - (6)",
+            "options": [
+              "-20",
+              "-8",
+              "-18",
+              "20"
+            ],
+            "correctIndex": 0,
+            "explanation": "Muốn trừ đi một số nguyên, ta cộng với số đối của nó: -14 - (6) = -14 + (-6) = -20."
+          },
+          {
+            "question": "Tính: 20 - (-13)",
+            "options": [
+              "7",
+              "35",
+              "33",
+              "-33"
+            ],
+            "correctIndex": 2,
+            "explanation": "Muốn trừ đi một số nguyên, ta cộng với số đối của nó: 20 - (-13) = 20 + (13) = 33."
+          },
+          {
+            "question": "Tính: -9 - (-9)",
+            "options": [
+              "2",
+              "-18",
+              "4",
+              "0"
+            ],
+            "correctIndex": 3,
+            "explanation": "Muốn trừ đi một số nguyên, ta cộng với số đối của nó: -9 - (-9) = -9 + (9) = 0."
+          },
+          {
+            "question": "Tính: -3 - (17)",
+            "options": [
+              "14",
+              "20",
+              "-18",
+              "-20"
+            ],
+            "correctIndex": 3,
+            "explanation": "Muốn trừ đi một số nguyên, ta cộng với số đối của nó: -3 - (17) = -3 + (-17) = -20."
+          },
+          {
+            "question": "Phá ngoặc biểu thức: a - (b - c + d)",
+            "options": [
+              "a - b + c - d",
+              "a + b - c + d",
+              "a - b + c + d",
+              "a - b - c + d"
+            ],
+            "correctIndex": 0,
+            "explanation": "Vì đằng trước ngoặc có dấu '-', ta đổi dấu tất cả các số hạng trong ngoặc. Kết quả: a - b + c - d."
+          },
+          {
+            "question": "Phá ngoặc biểu thức: x + (y - z + t)",
+            "options": [
+              "x + y - z - t",
+              "x + y + z + t",
+              "x + y - z + t",
+              "x - y + z - t"
+            ],
+            "correctIndex": 2,
+            "explanation": "Vì đằng trước ngoặc có dấu '+', ta giữ nguyên dấu tất cả các số hạng trong ngoặc. Kết quả: x + y - z + t."
+          },
+          {
+            "question": "Phá ngoặc biểu thức: m - (n + p - q)",
+            "options": [
+              "m + n + p - q",
+              "m - n + p - q",
+              "m - n - p - q",
+              "m - n - p + q"
+            ],
+            "correctIndex": 3,
+            "explanation": "Vì đằng trước ngoặc có dấu '-', ta đổi dấu tất cả các số hạng trong ngoặc. Kết quả: m - n - p + q."
+          },
+          {
+            "question": "Phá ngoặc biểu thức: k + (h - g - f)",
+            "options": [
+              "k - h + g + f",
+              "k + h + g - f",
+              "k + h - g - f",
+              "k + h - g + f"
+            ],
+            "correctIndex": 2,
+            "explanation": "Vì đằng trước ngoặc có dấu '+', ta giữ nguyên dấu tất cả các số hạng trong ngoặc. Kết quả: k + h - g - f."
+          },
+          {
+            "question": "Kết quả của phép tính (-25) + 25 là bao nhiêu?",
+            "options": [
+              "50",
+              "0",
+              "-50",
+              "25"
+            ],
+            "correctIndex": 1,
+            "explanation": "Hai số -25 và 25 là hai số đối nhau, tổng của hai số đối luôn bằng 0."
+          },
+          {
+            "question": "Muốn trừ số nguyên a cho số nguyên b, ta thực hiện phép tính nào?",
+            "options": [
+              "a - b = a + b",
+              "a - b = a + (-b)",
+              "a - b = (-a) + b",
+              "a - b = (-a) + (-b)"
+            ],
+            "correctIndex": 1,
+            "explanation": "Quy tắc trừ số nguyên: muốn trừ a cho b, ta cộng a với số đối của b, tức a - b = a + (-b)."
+          },
+          {
+            "question": "Khi đằng trước dấu ngoặc là dấu cộng '+', ta xử lý các số hạng trong ngoặc như thế nào khi bỏ ngoặc?",
+            "options": [
+              "Đổi dấu tất cả các số hạng",
+              "Giữ nguyên dấu tất cả các số hạng",
+              "Chỉ đổi dấu số hạng đầu tiên",
+              "Chỉ đổi dấu số hạng cuối cùng"
+            ],
+            "correctIndex": 1,
+            "explanation": "Nếu đằng trước ngoặc có dấu cộng, ta giữ nguyên dấu của tất cả các số hạng trong ngoặc khi bỏ ngoặc."
           }
         ]
       }
