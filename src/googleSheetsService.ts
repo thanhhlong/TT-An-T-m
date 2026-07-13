@@ -114,8 +114,8 @@ export const createGoogleSheet = async (accessToken: string, title: string): Pro
   }
 };
 
-const writeSheetValues = async (accessToken: string, spreadsheetId: string, values: any[][]) => {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Sheet1!A1?valueInputOption=RAW`;
+const writeSheetValues = async (accessToken: string, spreadsheetId: string, values: any[][], range: string = "Sheet1!A1") => {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=RAW`;
   const res = await fetch(url, {
     method: "PUT",
     headers: {
@@ -130,8 +130,8 @@ const writeSheetValues = async (accessToken: string, spreadsheetId: string, valu
   }
 };
 
-const readSheetValues = async (accessToken: string, spreadsheetId: string, range: string): Promise<any[][]> => {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`;
+const readSheetValues = async (accessToken: string, spreadsheetId: string, range: string, requireData: boolean = true): Promise<any[][]> => {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}`;
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
@@ -142,9 +142,65 @@ const readSheetValues = async (accessToken: string, spreadsheetId: string, range
   const data = await res.json();
   const rows = data.values;
   if (!rows || rows.length <= 1) {
-    throw new Error("Google Sheet này không có dữ liệu hoặc chỉ có dòng tiêu đề.");
+    if (requireData) {
+      throw new Error("Google Sheet này không có dữ liệu hoặc chỉ có dòng tiêu đề.");
+    }
+    return [];
   }
   return rows.slice(1);
+};
+
+// --- Named-tab helpers: used by the Center Management module, which keeps
+// one spreadsheet with a dedicated tab per entity (Students, Teachers, ...) ---
+
+export const listSpreadsheetTabTitles = async (accessToken: string, spreadsheetId: string): Promise<string[]> => {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties.title`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.error?.message || "Lỗi khi đọc danh sách tab của Google Sheet");
+  }
+  const data = await res.json();
+  return (data.sheets || []).map((s: any) => s.properties?.title).filter(Boolean);
+};
+
+export const ensureSpreadsheetTabs = async (accessToken: string, spreadsheetId: string, tabNames: string[]): Promise<void> => {
+  const existing = await listSpreadsheetTabTitles(accessToken, spreadsheetId);
+  const missing = tabNames.filter((t) => !existing.includes(t));
+  if (missing.length === 0) return;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      requests: missing.map((title) => ({ addSheet: { properties: { title } } })),
+    }),
+  });
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.error?.message || "Lỗi khi tạo tab mới trên Google Sheet");
+  }
+};
+
+export const writeNamedTabValues = async (
+  accessToken: string,
+  spreadsheetId: string,
+  tabName: string,
+  headers: string[],
+  rows: any[][]
+): Promise<void> => {
+  await writeSheetValues(accessToken, spreadsheetId, [headers, ...rows], `${tabName}!A1`);
+};
+
+export const readNamedTabValues = async (
+  accessToken: string,
+  spreadsheetId: string,
+  tabName: string
+): Promise<any[][]> => {
+  return readSheetValues(accessToken, spreadsheetId, `${tabName}!A1:Z2000`, false);
 };
 
 // --- Account file: Họ tên, Tài khoản, Mật khẩu, Khối ---
