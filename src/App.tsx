@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { CURRICULUM_DATA } from "./curriculumData";
 import CurriculumViewer from "./components/CurriculumViewer";
+import CenterManagement from "./components/CenterManagement";
 import {
   Sparkles,
   BookOpen,
@@ -56,7 +57,8 @@ import {
   Save,
   Eye,
   EyeOff,
-  Clock
+  Clock,
+  Building2
 } from "lucide-react";
 import {
   initAuthListener,
@@ -188,6 +190,7 @@ export default function App() {
   // Authentication & Multi-role States
   const [userRole, setUserRole] = useState<"student" | "teacher" | "admin" | null>(null);
   const [currentUser, setCurrentUser] = useState<any | null>(null);
+  const [showCenterManagement, setShowCenterManagement] = useState(false);
   const [loginRoleTab, setLoginRoleTab] = useState<"student" | "teacher" | "admin">("student");
   const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -1409,6 +1412,16 @@ Please use this student profile to customize your teaching. Use the scaffolding 
     "Hoàn tất! Chuẩn bị kết quả xuất bản..."
   ];
 
+  if (showCenterManagement && (userRole === "admin" || userRole === "teacher")) {
+    return (
+      <CenterManagement
+        currentUserName={currentUser?.hoTen}
+        accessToken={gToken}
+        onExit={() => setShowCenterManagement(false)}
+      />
+    );
+  }
+
   if (userRole === null) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4" id="auth-root">
@@ -2540,6 +2553,13 @@ Please use this student profile to customize your teaching. Use the scaffolding 
                 <span className="text-sm font-bold text-slate-800">Admin Quản trị viên</span>
                 <span className="text-[10px] text-amber-700 font-bold bg-amber-50 border border-amber-100 rounded-full px-2 py-0.5 text-center">Toàn quyền hệ thống</span>
               </div>
+              <button
+                onClick={() => setShowCenterManagement(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all border border-blue-100 cursor-pointer"
+              >
+                <Building2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Quản lý Trung tâm</span>
+              </button>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-all border border-rose-100 cursor-pointer"
@@ -4692,6 +4712,14 @@ Please use this student profile to customize your teaching. Use the scaffolding 
               <span className="text-[10px] text-slate-400">Giáo viên: {currentUser?.monHoc} • {currentUser?.capHoc}</span>
             </div>
 
+            <button
+              onClick={() => setShowCenterManagement(true)}
+              className="flex items-center space-x-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-100"
+              id="btn-center-management"
+            >
+              <Building2 className="w-4 h-4" />
+              <span className="hidden md:inline">Quản lý Trung tâm</span>
+            </button>
             <button
               onClick={() => setShowGuideModal(true)}
               className="flex items-center space-x-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
